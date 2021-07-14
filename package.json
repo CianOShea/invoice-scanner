@@ -1,0 +1,99 @@
+{
+  "name": "invoice-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "aws-sdk": "^2.944.0",
+    "bootstrap": "^5.0.2",
+    "cross-env": "^7.0.3",
+    "electron-is-dev": "^1.1.0",
+    "electron-log": "^4.3.5",
+    "electron-packager": "^14.0.1",
+    "electron-updater": "^4.3.9",
+    "evergreen-ui": "^6.1.0",
+    "file-saver": "^2.0.5",
+    "lodash": "^4.17.21",
+    "react": "^16.8.6",
+    "react-datasheet": "^1.4.9",
+    "react-dom": "^16.8.6",
+    "react-file-base64": "^1.0.3",
+    "react-scripts": "3.0.1",
+    "react-select": "^4.3.1",
+    "reactstrap": "^8.9.0",
+    "xlsx": "^0.17.0"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.0",
+    "electron": "^11.4.6",
+    "electron-builder": "^21.2.0",
+    "wait-on": "^3.3.0"
+  },
+  "homepage": "./",
+  "main": "public/electron.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron:serve": "concurrently -k \"cross-env BROWSER=none yarn start\" \"yarn electron:start\"",
+    "electron:build": "yarn build && electron-builder -c.extraMetadata.main=build/electron.js",
+    "electron:start": "wait-on tcp:3000 && electron .",
+    "electron:publish": "yarn build && electron-builder -c.extraMetadata.main=build/electron.js -p always",
+    "start-electron": "electron .",
+    "dev": "concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && npm run start-electron\"",
+    "pack-all": "electron-builder --em.main=build/electron.js --mac --win -p always",
+    "pack-win": "electron-builder -c.extraMetadata.main=build/electron.js --win",
+    "preelectron-pack": "npm run build",
+    "dist": "npm run build && build",
+    "pack": "build --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.cianoshea.invoice-scanner",
+    "mac": {
+      "category": "com.cianoshea.invoice-scanner",
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "productName": "Invoice Scanner",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "!build-scripts${/*}"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "CianOShea",
+        "repo": "invoice-scanner"
+      }
+    ]
+  },
+  "author": "Cian O'Shea",
+  "repository": "git@github.com:CianOShea/invoice-scanner.git",
+  "license": "CC",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
