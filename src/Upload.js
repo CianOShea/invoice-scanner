@@ -644,9 +644,7 @@ class Upload extends Component {
                       <p>
                         Current version: <span id="version">{appVersion}</span>
                       </p>
-                      <p>
-                        Private Repo
-                      </p>
+                      
                       <div id="messages">{messages}</div>
 
                       <div className="w3-light-grey">
