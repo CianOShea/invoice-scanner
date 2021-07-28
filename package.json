@@ -10,6 +10,7 @@
     "electron-log": "^4.3.5",
     "electron-packager": "^14.0.1",
     "electron-updater": "^4.3.9",
+    "electron-winstaller": "^5.0.0",
     "evergreen-ui": "^6.1.0",
     "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
@@ -17,6 +18,7 @@
     "react-datasheet": "^1.4.9",
     "react-dom": "^16.8.6",
     "react-file-base64": "^1.0.3",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "3.0.1",
     "react-select": "^4.3.1",
     "reactstrap": "^8.9.0",
@@ -26,6 +28,7 @@
     "concurrently": "^6.2.0",
     "electron": "^11.4.6",
     "electron-builder": "^21.2.0",
+    "electron-wix-msi": "^3.2.0",
     "wait-on": "^3.3.0"
   },
   "homepage": "./",

@@ -4,10 +4,10 @@
 import React, { Component, Fragment } from 'react';
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
-import './upload.css'
+import '../upload.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactDataSheet from 'react-datasheet';
-import './index.css';
+import '../index.css';
 import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph } from 'evergreen-ui'
 
 import AWS from 'aws-sdk';
@@ -32,7 +32,7 @@ AWS.config.update({
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
 
-class Upload extends Component {
+class Bank extends Component {
 
    constructor(props) {
       super(props);
@@ -638,7 +638,7 @@ class Upload extends Component {
                 <div>                      
 
                     <Pane padding='50px' paddingTop={10} justifyContent='center' alignItems='center'>  
-
+                        Bank
                       <Pane>
                         <Tablist marginBottom={16} flexBasis={240} marginRight={24}>
                             <Tab
@@ -1004,4 +1004,4 @@ class Upload extends Component {
     }
 }
  
-export default Upload;
+export default Bank;

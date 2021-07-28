@@ -2,11 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import Upload from './Upload'
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Routes } from './Routes';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Upload />
+    <Router>
+      <Routes />
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
