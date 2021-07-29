@@ -40,8 +40,6 @@ class Bank extends Component {
       this.myRef = React.createRef();
     
       this.state = {    
-          invoiceTab: true,
-          bankTab: false,
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -632,188 +630,143 @@ class Bank extends Component {
 
     
     render() { 
-        const { invoiceTab, bankTab, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+        const { progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
 
         return ( 
             <div>
-                <div>                      
+                <div>                 
 
                     <Pane padding='50px' paddingTop={10} justifyContent='center' alignItems='center'>  
-                        Bank
-                      <Pane>
-                        <Tablist marginBottom={16} flexBasis={240} marginRight={24}>
-                            <Tab
-                              key={'invoiceTab'}
-                              id={'invoiceTab'}
-                              onSelect={() => this.setState({ invoiceTab: true, bankTab: false })}
-                              isSelected={invoiceTab}
-                            >
-                              Invoice Statements
-                            </Tab>
-                            <Tab
-                              key={'bankTab'}
-                              id={'bankTab'}
-                              onSelect={() => this.setState({ invoiceTab: false, bankTab: true })}
-                              isSelected={bankTab}
-                            >
-                              Bank Statements
-                            </Tab>
-                        </Tablist>
+                        
 
+                      <Heading size={900}>Bank Statement Scanner</Heading>
+
+                      <Form onSubmit={this.handleSubmit}>
+                          <FormGroup>
+
+                              <FormText color='muted'>Accepted File Types: PNG, JPG, PDF</FormText>                        
+
+                              <div ref= {this.myRef} className='form-group files color'>
+                                  <FileBase64                                     
+                                      multiple={true}
+                                      onDone={this.readFiles.bind(this)}
+                                  />
+                              </div>
+                          </FormGroup>
+                      </Form>
+
+                      <Pane display='flex' justifyContent='center' marginTop={10}>
+                        {
+                          !isScanning ?
+                          <Pane display='flex' flexDirection='row'> 
+                            <Button marginRight={50} intent='none' appearance="primary" onClick={() => this.beginScan()}>Scan</Button>   
+                            
+                            <Button intent='danger' appearance="primary" onClick={() => this.refresh()}>Clear All Data</Button>                                 
+                          </Pane>
+                          :
+                          <Pane flex={1} alignItems="center" display="flex" justifyContent='center'>
+                            <Spinner/>
+                          </Pane>
+                        } 
                         
                       </Pane>
-                      { invoiceTab &&
-                      <Fragment>
 
-                        <Heading size={900}>Invoice Scanner</Heading>
-
-                        <Form onSubmit={this.handleSubmit}>
-                            <FormGroup>
-
-                                <FormText color='muted'>Accepted File Types: PNG, JPG, PDF</FormText>                        
-
-                                <div ref= {this.myRef} className='form-group files color'>
-                                    <FileBase64                                     
-                                        multiple={true}
-                                        onDone={this.readFiles.bind(this)}
-                                    />
-                                </div>
-                            </FormGroup>
-                        </Form>
-
-                        <Pane display='flex' justifyContent='center' marginTop={10}>
-                          {
-                            !isScanning ?
-                            <Pane display='flex' flexDirection='row'> 
-                              <Button marginRight={50} intent='none' appearance="primary" onClick={() => this.beginScan()}>Scan</Button>   
-                              
-                              <Button intent='danger' appearance="primary" onClick={() => this.refresh()}>Clear All Data</Button>                                 
-                            </Pane>
-                            :
-                            <Pane flex={1} alignItems="center" display="flex" justifyContent='center'>
-                              <Spinner/>
-                            </Pane>
-                          } 
+              
+                      <Pane  margin='auto' paddingBottom='50px' display='flex' flexDirection='row'>
+                        <Pane width='50%' display='flex' flexDirection='column' padding={20}>
+                          <Heading size={700}>Unscanned Files</Heading>
                           
-                        </Pane>
-
-                
-                        <Pane  margin='auto' paddingBottom='50px' display='flex' flexDirection='row'>
-                          <Pane width='50%' display='flex' flexDirection='column' padding={20}>
-                            <Heading size={700}>Unscanned Files</Heading>
-                            
-                            <Table>
-                              <Table.Head>
-                                <Table.TextHeaderCell>File Name</Table.TextHeaderCell>
-                              </Table.Head>
-                              <Table.Body minHeight={64}>
-                                {unscannedFiles.length > 0 &&
-                                  <Fragment>
-                                    {
-                                      unscannedFiles.map((file,index) => (  
-                                            <Table.Row key={index} file={file}>
-                                              <Table.TextCell>{file.fileName}</Table.TextCell>
-                                              {/* <Table.TextCell>{file.scanned == false ? 'Not Scanned' : 'Scanned'}</Table.TextCell> */}
-                                              {
-                                                !isScanning &&
-                                                <Button intent='danger' appearance="primary" margin='auto' marginRight='50px' onClick={() => this.removeFile(index)}>Remove</Button>
-                                              }                                            
-                                            </Table.Row>                             
-                                      ))
-                                    }
-                                  </Fragment>
-                                }
-                              </Table.Body>
-                            </Table>  
-                            
-                          </Pane>
-                          <Pane width='50%' display='flex' flexDirection='column' padding={20}>
-                            <Heading size={700}>Scanned Files</Heading>                          
-                            <Table>
-                              <Table.Head>
-                                <Table.TextHeaderCell>File Name</Table.TextHeaderCell>
-                              </Table.Head>
-                              <Table.Body minHeight={64}>
-                              {scannedFiles.length > 0 &&
+                          <Table>
+                            <Table.Head>
+                              <Table.TextHeaderCell>File Name</Table.TextHeaderCell>
+                            </Table.Head>
+                            <Table.Body minHeight={64}>
+                              {unscannedFiles.length > 0 &&
                                 <Fragment>
                                   {
-                                    scannedFiles.map((file,index) => (  
+                                    unscannedFiles.map((file,index) => (  
                                           <Table.Row key={index} file={file}>
                                             <Table.TextCell>{file.fileName}</Table.TextCell>
+                                            {/* <Table.TextCell>{file.scanned == false ? 'Not Scanned' : 'Scanned'}</Table.TextCell> */}
+                                            {
+                                              !isScanning &&
+                                              <Button intent='danger' appearance="primary" margin='auto' marginRight='50px' onClick={() => this.removeFile(index)}>Remove</Button>
+                                            }                                            
                                           </Table.Row>                             
                                     ))
                                   }
                                 </Fragment>
                               }
-                              </Table.Body>
-                            </Table>  
-                            
-                          </Pane>
-                        </Pane>   
-
-                        <Pane display='flex' justifyContent='center' marginBottom={10}>
-                          {
-                            missingData.length > 0 &&
-                              <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
-                          }              
-                          {
-                            scannedFileData.length > 0 &&
-                              <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
-                          }        
+                            </Table.Body>
+                          </Table>  
                           
-                        </Pane>           
+                        </Pane>
+                        <Pane width='50%' display='flex' flexDirection='column' padding={20}>
+                          <Heading size={700}>Scanned Files</Heading>                          
+                          <Table>
+                            <Table.Head>
+                              <Table.TextHeaderCell>File Name</Table.TextHeaderCell>
+                            </Table.Head>
+                            <Table.Body minHeight={64}>
+                            {scannedFiles.length > 0 &&
+                              <Fragment>
+                                {
+                                  scannedFiles.map((file,index) => (  
+                                        <Table.Row key={index} file={file}>
+                                          <Table.TextCell>{file.fileName}</Table.TextCell>
+                                        </Table.Row>                             
+                                  ))
+                                }
+                              </Fragment>
+                            }
+                            </Table.Body>
+                          </Table>  
+                          
+                        </Pane>
+                      </Pane>   
 
-                        <ReactDataSheet
-                          data={this.state.header}
-                          valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
-                        />
+                      <Pane display='flex' justifyContent='center' marginBottom={10}>
                         {
-                          scannedFileData.length > 0 ?
-                            <ReactDataSheet
-                              data={this.state.scannedFileData}
-                              valueRenderer={cell => cell.value}
-                              onCellsChanged={changes => {
-                                const scannedFileData = this.state.scannedFileData.map(row => [...row]);
-                                changes.forEach(({ cell, row, col, value }) => {
-                                  scannedFileData[row][col] = { ...scannedFileData[row][col], value };
-                                });
-                                this.setState({ scannedFileData });
-                              }}                        
-                            />
-                            :
-                            <ReactDataSheet
-                              data={this.state.grid}
-                              valueRenderer={cell => cell.value}
-                              onCellsChanged={changes => {
-                                const grid = this.state.grid.map(row => [...row]);
-                                changes.forEach(({ cell, row, col, value }) => {
-                                  grid[row][col] = { ...grid[row][col], value };
-                                });
-                                this.setState({ grid });
-                              }}                        
-                            />
-                        }      
-                      </Fragment>
-                    }     
-                    { bankTab &&
-                      <Fragment>
-                        <Heading size={900}>Bank Scanner</Heading>
+                          missingData.length > 0 &&
+                            <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
+                        }              
+                        {
+                          scannedFileData.length > 0 &&
+                            <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
+                        }        
+                        
+                      </Pane>           
 
-                        <Form onSubmit={this.handleSubmit}>
-                            <FormGroup>
-
-                                <FormText color='muted'>Accepted File Types: PNG, JPG, PDF</FormText>                        
-
-                                <div ref= {this.myRef} className='form-group files color'>
-                                    <FileBase64                                     
-                                        multiple={true}
-                                        onDone={this.readFiles.bind(this)}
-                                    />
-                                </div>
-                            </FormGroup>
-                        </Form>
-                      </Fragment>
-                    }                
+                      <ReactDataSheet
+                        data={this.state.header}
+                        valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
+                      />
+                      {
+                        scannedFileData.length > 0 ?
+                          <ReactDataSheet
+                            data={this.state.scannedFileData}
+                            valueRenderer={cell => cell.value}
+                            onCellsChanged={changes => {
+                              const scannedFileData = this.state.scannedFileData.map(row => [...row]);
+                              changes.forEach(({ cell, row, col, value }) => {
+                                scannedFileData[row][col] = { ...scannedFileData[row][col], value };
+                              });
+                              this.setState({ scannedFileData });
+                            }}                        
+                          />
+                          :
+                          <ReactDataSheet
+                            data={this.state.grid}
+                            valueRenderer={cell => cell.value}
+                            onCellsChanged={changes => {
+                              const grid = this.state.grid.map(row => [...row]);
+                              changes.forEach(({ cell, row, col, value }) => {
+                                grid[row][col] = { ...grid[row][col], value };
+                              });
+                              this.setState({ grid });
+                            }}                        
+                          />
+                      }          
                     </Pane>
                     
                     {

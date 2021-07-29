@@ -79,10 +79,10 @@ body {
     to { transform: rotate(360deg); }
   }
   
-  .container {
+  /* .container {
     max-width: 600px;
     margin: auto;  
-  }
+  } */
   table.data-grid {
     margin: auto;
     width: 80%;
