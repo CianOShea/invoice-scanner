@@ -8,6 +8,7 @@ import '../upload.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactDataSheet from 'react-datasheet';
 import '../index.css';
+import '../grid.css';
 import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph } from 'evergreen-ui'
 
 import AWS from 'aws-sdk';
