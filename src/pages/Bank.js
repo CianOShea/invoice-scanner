@@ -55,7 +55,7 @@ class Bank extends Component {
           imageDataURL: null,
           sortedForm: {},
           header: [
-            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]            
           ],
           grid: [
             [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
@@ -218,7 +218,7 @@ class Bank extends Component {
                 
                 FDmap.map(FDdata => {
                     KMmap.map(KMdata => {
-                        if(FDdata[0] == KMdata[0]){
+                        if(FDdata[0] === KMdata[0]){
                             sortedForm.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
                         }
                     })
@@ -236,12 +236,20 @@ class Bank extends Component {
                   form.push(arr)
                 })
 
-                const invoiceDate = this.findInvoiceDate(sortedForm, index)
-                const invoiceNumber = this.findInvoiceNumber(sortedForm, index)
-                const invoiceTotal = this.findInvoiceTotal(sortedForm, index)
-                
-                scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.VAT.Value }, { value: invoiceTotal.TOTAL.Value }])                
-              
+                // console.log('Tables');
+                // console.log(datasheetTABLES);
+                // console.log('Formdata');
+                // console.log(lambdaData.body.kv);
+                // console.log('KeyMap');
+                // console.log(lambdaData.body.key_map);
+                // console.log('SortedForm');
+                // console.log(sortedForm);
+                // console.log('Form');
+                // console.log(form);
+
+                // scannedFileData.push(form)
+                // scannedFileData.push(datasheetTABLES)
+                // console.log(scannedFileData);
                 this.setState({ formData: lambdaData.body.kv, keyMap: lambdaData.body.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData })
               }
               this.prepareAllCSV()
@@ -280,15 +288,14 @@ class Bank extends Component {
     }
 
     prepareExcel(){
-      const { scannedFileData, header } = this.state
+      const { xlsxData } = this.state
 
-      console.log(scannedFileData);
-      console.log(header);
+      console.log(xlsxData);
 
       var excel = []
 
-      for(var i=0; i < scannedFileData.length; i++){          
-        var arr = scannedFileData[i].map(row => {
+      for(var i=0; i < xlsxData.length; i++){          
+        var arr = xlsxData[i].map(row => {
           var value = Object.values(row)
           return value
         })
@@ -296,14 +303,6 @@ class Bank extends Component {
         excel.push(merged)
       }    
 
-      for(var i=0; i < header.length; i++){          
-        var arr = header[i].map(row => {
-          var value = row.value
-          return value
-        })
-        var merged = [].concat.apply([], arr);
-        excel.unshift(merged)
-      }
       console.log(excel);
 
       var ws = XLSX.utils.aoa_to_sheet(excel);
@@ -326,31 +325,63 @@ class Bank extends Component {
     }
 
     prepareAllCSV() {
-      const { sampleData, form, xlsxData } = this.state
-    
+      const { sampleData, form, xlsxData, header } = this.state
+
+      var largestTableArrLength = 0
+
+      for(var i=0; i < sampleData.length; i++){ 
+        if(Math.max(...(sampleData[i].map(el => el.length))) > largestTableArrLength) {
+          var largestTableArrLength = Math.max(...(sampleData[i].map(el => el.length)))
+        }
+      }
+      
+      var largestFormArrLength = Math.max(...(sampleData[0].map(el => el.length)))
+      if(largestTableArrLength > largestFormArrLength){ var biggestArr = largestTableArrLength} else { var biggestArr = largestFormArrLength }        
+
+      for(var i=0; i < form.length; i++){          
+        var arr = form[i].map(row => {
+        var value = row
+        return value
+        })
+        var merged = [].concat.apply([], arr);
+        xlsxData.push(merged)
+      }      
 
       for(var i=0; i < sampleData.length; i++){ 
 
-          for(var j=0; j < sampleData[i].length; j++){          
+        for(var j=0; j < sampleData[i].length; j++){          
           var arr = sampleData[i][j].map(row => {
-              var value = Object.values(row)
+              var value = row
               return value
           })
           var merged = [].concat.apply([], arr);
           xlsxData.push(merged)
-          }   
+        }   
       } 
 
-      for(var i=0; i < form.length; i++){          
-          var arr = form[i].map(row => {
-          var value = Object.values(row)
-          return value
-          })
-          var merged = [].concat.apply([], arr);
-          xlsxData.push(merged)
-      }       
+      // Making sure all array lengths are the same including header
+      for(var i=0; i < xlsxData.length; i++){
+        if(xlsxData[i].length < biggestArr){
+          for(var j=xlsxData[i].length; j < biggestArr; j++){ 
+            xlsxData[i].push({value: ''})
+          }
+        }
+      }
       
-      this.setState({ xlsxData: xlsxData })
+      var headerArr = []
+      for(var j=0; j < biggestArr; j++){ 
+          headerArr.push({value: ''})
+      }    
+      header[0] = headerArr 
+      
+
+      var emptyArr = []
+      for(var i=0; i < biggestArr; i++){
+        emptyArr.push({value: ''})
+      }      
+      xlsxData.push(emptyArr)
+
+      this.setState({ xlsxData: xlsxData, header: header })
       console.log(xlsxData);
     }
 
@@ -412,215 +443,6 @@ class Bank extends Component {
 
       saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), 'data.xlsx');
      
-    }
-
-    setMissingData(fileName, Type, Data, scannedFileIndex){
-      const { missingData } = this.state 
-      const index = _.findIndex(missingData, function(data) { return data.fileName == fileName });    
-      if(index != -1){
-        missingData[index][Type] = Data
-      } else {
-        let newMissingData = { scannedFileIndex: scannedFileIndex, fileName: fileName, [Type] : Data }
-        missingData.push(newMissingData)
-      }      
-      this.setState({ missingData: missingData })
-    }
-
-    findInvoiceDate(sortedForm, index){
-      const { unscannedFiles, missingData } = this.state
-
-      console.log(sortedForm);
-      console.log(index);
-      var dateSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))     
-
-      if (dateSearch.length === 0){
-        var invoiceDate = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'Date', [], index)
-      }
-      if (dateSearch.length === 1){
-        var invoiceDate = dateSearch[0]
-      }
-      if (dateSearch.length > 1){
-        var sampleIncludes = ['ISSUE', 'INVOICE']
-        var includeVarsArr = []
-        for(var i=0; i < sampleIncludes.length; i++){
-          var loopTest = dateSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i]))               
-          if(loopTest.length > 0){
-            includeVarsArr.push(loopTest)
-          }
-          var multiDate = [].concat.apply([], includeVarsArr)
-          multiDate = [...new Set(multiDate)]
-        } 
-        if(multiDate.length === 1){
-          var invoiceDate = multiDate[0]
-        } 
-        if(multiDate.length > 1) {
-          var invoiceDate = {Key: '', Value: ''}
-          this.setMissingData(unscannedFiles[index].fileName, 'Date', multiDate, index)
-        }
-        if(multiDate.length === 0) {
-          var onlyDate = dateSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase() === ('DATE'))
-          if(onlyDate.length === 1){
-            var invoiceDate = onlyDate[0]
-          } else {
-            var invoiceDate = {Key: '', Value: ''}
-            this.setMissingData(unscannedFiles[index].fileName, 'Date', dateSearch, index)
-          }          
-        }
-      }
-      return invoiceDate
-    }
-
-    findInvoiceNumber(sortedForm, index){
-      const { unscannedFiles, missingData } = this.state
-
-      console.log(sortedForm);
-      console.log(index);
-      var invoiceSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('INVOICE') && !data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))
-
-      if (invoiceSearch.length === 0){
-        var invoiceNumber = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'InvoiceNumber', [], index)
-      }
-      if (invoiceSearch.length === 1){
-        var invoiceNumber = invoiceSearch[0]
-      }
-      if (invoiceSearch.length > 1){
-        var sampleIncludes = ['NO.', 'NO', 'NO:', 'NUMBER']
-        var includeVarsArr = []
-        for(var i=0; i < sampleIncludes.length; i++){
-          var loopTest = invoiceSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i]))               
-          if(loopTest.length > 0){
-            includeVarsArr.push(loopTest)
-          }
-          var multiInvoice = [].concat.apply([], includeVarsArr)
-          multiInvoice = [...new Set(multiInvoice)]
-        } 
-        if(multiInvoice.length === 1){
-          var invoiceNumber = multiInvoice[0]
-        } 
-        if(multiInvoice.length > 1) {
-          var invoiceNumber = {Key: '', Value: ''}
-          this.setMissingData(unscannedFiles[index].fileName, 'InvoiceNumber', multiInvoice, index)
-        }
-        if(multiInvoice.length === 0) {
-          var onlyInvoiceNumber = invoiceSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase() === ('INVOICE'))
-          if(onlyInvoiceNumber.length === 1){
-            var invoiceNumber = onlyInvoiceNumber[0]
-          } else {
-            var invoiceNumber = {Key: '', Value: ''}
-            this.setMissingData(unscannedFiles[index].fileName, 'InvoiceNumber', invoiceSearch, index)
-          }
-        }
-      }
-      return invoiceNumber
-    }
-
-    findInvoiceTotal(sortedForm, index){
-      const { unscannedFiles, missingData } = this.state
-
-      console.log(sortedForm);
-      console.log(index);
-
-      var vatSearch = sortedForm.filter(data => /\d/.test(JSON.stringify(data.Value).replace(/\s/g, '')) && JSON.stringify(data.Value).replace(/\s/g, '').includes('.') && !/[a-zA-Z]/.test(JSON.stringify(data.Value).replace(/\s/g, '')))
-      console.log(vatSearch);
-    
-      var sampleIncludes = ['V.A.T.', 'V.A.T', 'TAX', 'VAT']
-      var includeVarsArr = []
-      for(var i=0; i < sampleIncludes.length; i++){
-        var loopTest = vatSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i]))               
-        if(loopTest.length > 0){
-          includeVarsArr.push(loopTest)
-        }
-        var multiVAT = [].concat.apply([], includeVarsArr)
-        multiVAT = [...new Set(multiVAT)]
-      } 
-      if(multiVAT.length === 1){
-        var invoiceVAT = multiVAT[0]
-      } 
-      if(multiVAT.length > 1) {
-        var invoiceVAT = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'VAT', multiVAT, index)
-      }
-      if(multiVAT.length === 0) {
-        var invoiceVAT = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'VAT', vatSearch, index)
-      }
-
-      var sampleIncludes = ['TOTAL', 'AMOUNT', 'DUE', 'BALANCE', 'OWE', 'GOODS']
-      var includeVarsArr = []
-      for(var i=0; i < sampleIncludes.length; i++){
-        var loopTest = vatSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i]) && !data.Key.replace(/\s/g, '').toUpperCase().includes('SUB') && !data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))               
-        if(loopTest.length > 0){
-          includeVarsArr.push(loopTest)
-        }
-        var multiTOTAL = [].concat.apply([], includeVarsArr)
-        multiTOTAL = [...new Set(multiTOTAL)]        
-      }         
-      
-      if(multiTOTAL.length === 1){
-        var invoiceTOTAL = multiTOTAL[0]
-      } 
-      if(multiTOTAL.length > 1) {
-
-        function checkValue(data) {
-          return parseFloat(JSON.stringify(data.Value).replace(/[^\d\.]/g, "")) === parseFloat(JSON.stringify(multiTOTAL[0].Value).replace(/[^\d\.]/g, ""))
-        }
-        if(multiTOTAL.every(checkValue)){          
-          var invoiceTOTAL = {Key: 'Total', Value: parseFloat(JSON.stringify(multiTOTAL[0].Value).replace(/[^\d\.]/g, "")).toFixed(2)}
-        } else {
-          var invoiceTOTAL = {Key: '', Value: ''}
-          this.setMissingData(unscannedFiles[index].fileName, 'Total', multiTOTAL, index)
-        }
-      }
-      if(multiTOTAL.length === 0) {
-        var invoiceTOTAL = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'Total', vatSearch, index)
-      }
-
-      var sampleIncludes = ['SUB', 'GROSS']
-      var includeVarsArr = []
-      for(var i=0; i < sampleIncludes.length; i++){
-        var loopTest = vatSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i]))               
-        if(loopTest.length > 0){
-          includeVarsArr.push(loopTest)
-        }
-        var multiSUBTOTAL = [].concat.apply([], includeVarsArr)
-        multiSUBTOTAL = [...new Set(multiSUBTOTAL)]
-      } 
-      console.log(multiSUBTOTAL);
-      if(multiSUBTOTAL.length === 1){
-        var invoiceSUBTOTAL = multiSUBTOTAL[0]
-      } 
-      if(multiSUBTOTAL.length > 1) {
-        var invoiceSUBTOTAL = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'Subtotal', multiSUBTOTAL, index)
-      }
-      if(multiSUBTOTAL.length === 0) {
-        var invoiceSUBTOTAL = {Key: '', Value: ''}
-        this.setMissingData(unscannedFiles[index].fileName, 'Subtotal', vatSearch, index)
-      }
-
-      if(invoiceVAT.Value != '' && invoiceTOTAL.Value === '' && invoiceSUBTOTAL.Value != ''){
-        var vatNumber = parseFloat(JSON.stringify(invoiceVAT.Value).replace(/[^\d\.]/g, ""));
-        var subtotalNumber = parseFloat(JSON.stringify(invoiceSUBTOTAL).replace(/[^\d\.]/g, ""));
-        var tempTotalNumber = vatNumber + subtotalNumber
-        for(var i=0; i < multiTOTAL.length; i++){
-          if(parseFloat(JSON.stringify(multiTOTAL[i].Value).replace(/[^\d\.]/g, "")) === tempTotalNumber){
-            var invoiceTOTAL = multiTOTAL[i]
-          }
-        }
-
-      }
-     
-      if(invoiceVAT.Value != '' && invoiceTOTAL.Value != '' && invoiceSUBTOTAL.Value === ''){
-        var vatNumber = parseFloat(JSON.stringify(invoiceVAT.Value).replace(/[^\d\.]/g, ""));
-        var totalNumber = parseFloat(JSON.stringify(invoiceTOTAL).replace(/[^\d\.]/g, ""));
-        invoiceSUBTOTAL = {Key: 'Subtotal', Value: totalNumber - vatNumber  }  
-      }
-
-      var allInvoiceNumbers = { VAT: invoiceVAT, TOTAL: invoiceTOTAL, SUBTOTAL: invoiceSUBTOTAL }
-      return allInvoiceNumbers
     }
 
     refresh(){
@@ -731,7 +553,7 @@ class Bank extends Component {
                             <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
                         }              
                         {
-                          scannedFileData.length > 0 &&
+                          xlsxData.length > 0 &&
                             <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
                         }        
                         
@@ -742,16 +564,16 @@ class Bank extends Component {
                         valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
                       />
                       {
-                        scannedFileData.length > 0 ?
+                        xlsxData.length > 0 ?
                           <ReactDataSheet
-                            data={this.state.scannedFileData}
+                            data={this.state.xlsxData}
                             valueRenderer={cell => cell.value}
                             onCellsChanged={changes => {
-                              const scannedFileData = this.state.scannedFileData.map(row => [...row]);
+                              const xlsxData = this.state.xlsxData.map(row => [...row]);
                               changes.forEach(({ cell, row, col, value }) => {
-                                scannedFileData[row][col] = { ...scannedFileData[row][col], value };
+                                xlsxData[row][col] = { ...xlsxData[row][col], value };
                               });
-                              this.setState({ scannedFileData });
+                              this.setState({ xlsxData });
                             }}                        
                           />
                           :
