@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Navbar from '../components/Navbar'
 import { Link, withRouter } from 'react-router-dom';
 import firebase from '../firebase/firebase'
 import Cookie from 'js-cookie'
@@ -41,6 +42,8 @@ export default class login extends Component {
     render() {
         const { email, password } = this.state
         return (
+            <div>
+            <Navbar/> 
             <div className="flex max-w-sm mx-auto overflow-hidden place-content-center bg-white rounded-lg shadow-lg dark:bg-gray-800 lg:max-w-4xl">
                 
                 <div className="w-full px-6 py-8 md:px-8 lg:w-1/2">
@@ -94,6 +97,7 @@ export default class login extends Component {
                         <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
                     </div>
                 </div>
+            </div>
             </div>   
         )
     }

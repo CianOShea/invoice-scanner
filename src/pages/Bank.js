@@ -2,6 +2,7 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable no-unused-vars */
 import React, { Component, Fragment } from 'react';
+import Navbar from '../components/Navbar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
 import '../upload.css'
@@ -18,6 +19,9 @@ import XLSX from 'xlsx';
 
 import _ from 'lodash'
 import Select from 'react-select'
+
+import firebase from '../firebase/firebase'
+const db = firebase.firestore();
 
 
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -40,6 +44,8 @@ class Bank extends Component {
       this.myRef = React.createRef();
     
       this.state = {    
+          userToken: '', 
+          paymentID: '',
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -102,6 +108,25 @@ class Bank extends Component {
         console.log(`progressBar: ${text}`);
         this.setState({ progressBar: text})
       })
+
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          db.collection("users").doc(user.uid).get().then((doc) => {
+              if (doc.exists) {
+                  console.log("Document data:", doc.data());
+                  this.setState({ userToken: user.uid, paymentID: doc.data().paymentID })               
+              } else {
+                  // doc.data() will be undefined in this case
+                  console.log("No such document!");
+              }
+          }).catch((error) => {
+              console.log("Error getting document:", error);
+          });
+        } else {
+          // No user is signed in.
+          console.log('Not logged In');
+        }
+      });
     }
 
     handleRenderer(event, data) {
@@ -253,6 +278,7 @@ class Bank extends Component {
                 this.setState({ formData: lambdaData.body.kv, keyMap: lambdaData.body.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData })
               }
               this.prepareAllCSV()
+              this.updateScanNumber()
             }
 
    
@@ -445,6 +471,16 @@ class Bank extends Component {
      
     }
 
+    updateScanNumber(){
+      const { userToken, paymentID } = this.state
+      const increment = firebase.firestore.FieldValue.increment(1);
+      const userRef = db.collection("users").doc(userToken);
+      userRef.update({ NoOfScans: increment });  
+
+      const teamRef = db.collection("teams").doc(paymentID);
+      teamRef.update({ ScansCompleted: increment });
+    }
+
     refresh(){
         this.myRef.current.children[0].value = null
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
@@ -457,6 +493,7 @@ class Bank extends Component {
         return ( 
             <div>
                 <div>                 
+                    <Navbar/> 
 
                     <Pane padding='50px' paddingTop={10} justifyContent='center' alignItems='center'>  
                         
