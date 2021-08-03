@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Home from './pages/Home';
 import Invoice from './pages/Invoice';
 import Bank from './pages/Bank';

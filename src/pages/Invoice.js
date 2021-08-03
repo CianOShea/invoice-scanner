@@ -278,6 +278,7 @@ class Invoice extends Component {
               }
               this.prepareAllCSV()
               this.updateScanNumber()
+              this.deleteS3(targetImage)
             }
 
    
@@ -669,6 +670,17 @@ class Invoice extends Component {
     refresh(){
         this.myRef.current.children[0].value = null
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+    }
+
+
+    deleteS3(targetImage){
+      var s3 = new AWS.S3();
+      var params = {  Bucket: process.env.REACT_APP_S3_BUCKET, Key: targetImage };
+
+      s3.deleteObject(params, function(err, data) {
+        if (err) console.log(err, err.stack);  // error
+        else     console.log();                 // deleted
+      });
     }
 
     

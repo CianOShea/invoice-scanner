@@ -284,6 +284,7 @@ class Bank extends Component {
               }
               this.prepareAllCSV()
               this.updateScanNumber()
+              this.deleteS3(targetImage)
             }
 
    
@@ -491,6 +492,15 @@ class Bank extends Component {
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
     }
 
+    deleteS3(targetImage){
+      var s3 = new AWS.S3();
+      var params = {  Bucket: process.env.REACT_APP_S3_BUCKET, Key: targetImage };
+
+      s3.deleteObject(params, function(err, data) {
+        if (err) console.log(err, err.stack);  // error
+        else     console.log();                 // deleted
+      });
+    }
     
     render() { 
         const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
