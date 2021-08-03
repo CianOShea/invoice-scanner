@@ -132,6 +132,10 @@ class Bank extends Component {
           this.setState({ pageLoaded: true, redirect: '/Home' })
         }
       });
+
+      if(sessionStorage.getItem('bankScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('bankScannedFiles')) } else { var scannedFiles = [] }
+      if(sessionStorage.getItem('bankXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('bankXlsxData')) } else { var xlsxData = [] }      
+      this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
     }
 
     handleRenderer(event, data) {
@@ -284,8 +288,8 @@ class Bank extends Component {
               }
               this.prepareAllCSV()
               this.updateScanNumber()
-              this.deleteS3(targetImage)
-            }
+              this.deleteS3(targetImage)              
+          }
 
    
         } catch (error) {
@@ -310,6 +314,7 @@ class Bank extends Component {
         scannedFiles.push(unscannedFiles[i])
         unscannedFiles[i].scanned = true
         this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+        this.updateSessionStorage()
       }
       console.log('Scan Complete');
       if(missingData.length > 0) {
@@ -501,6 +506,13 @@ class Bank extends Component {
         else     console.log();                 // deleted
       });
     }
+
+    updateSessionStorage(){
+      const { scannedFiles, scannedFileData, missingData, xlsxData } = this.state
+
+      sessionStorage.setItem('bankScannedFiles', JSON.stringify(scannedFiles))
+      sessionStorage.setItem('bankXlsxData', JSON.stringify(xlsxData))
+    }
     
     render() { 
         const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
@@ -633,7 +645,7 @@ class Bank extends Component {
                               changes.forEach(({ cell, row, col, value }) => {
                                 xlsxData[row][col] = { ...xlsxData[row][col], value };
                               });
-                              this.setState({ xlsxData });
+                              this.setState({ xlsxData }, () => this.updateSessionStorage());
                             }}                        
                           />
                           :

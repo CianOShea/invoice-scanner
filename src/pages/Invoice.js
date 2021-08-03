@@ -134,6 +134,12 @@ class Invoice extends Component {
           this.setState({ pageLoaded: true, redirect: '/Home' })
         }
       });
+
+      if(sessionStorage.getItem('invoiceScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('invoiceScannedFiles')) } else { var scannedFiles = [] }
+      if(sessionStorage.getItem('invoiceScannedFileData')) { var scannedFileData = JSON.parse(sessionStorage.getItem('invoiceScannedFileData')) } else { var scannedFileData = [] }
+      if(sessionStorage.getItem('invoiceMissingData')) { var missingData = JSON.parse(sessionStorage.getItem('invoiceMissingData')) } else { var missingData = [] }
+      if(sessionStorage.getItem('invoiceXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('invoiceXlsxData')) } else { var xlsxData = [] }
+      this.setState({ scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
     }
 
     handleRenderer(event, data) {
@@ -304,6 +310,7 @@ class Invoice extends Component {
         scannedFiles.push(unscannedFiles[i])
         unscannedFiles[i].scanned = true
         this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+        this.updateSessionStorage()
       }
       console.log('Scan Complete');
       if(missingData.length > 0) {
@@ -449,7 +456,7 @@ class Invoice extends Component {
     }
 
     setMissingData(fileName, Type, Data, scannedFileIndex){
-      const { missingData } = this.state 
+      const { missingData, scannedFileData } = this.state 
       const index = _.findIndex(missingData, function(data) { return data.fileName == fileName });    
       if(index != -1){
         missingData[index][Type] = Data
@@ -457,7 +464,7 @@ class Invoice extends Component {
         let newMissingData = { scannedFileIndex: scannedFileIndex, fileName: fileName, [Type] : Data }
         missingData.push(newMissingData)
       }      
-      this.setState({ missingData: missingData })
+      this.setState({ missingData: missingData });
     }
 
     findInvoiceDate(sortedForm, index){
@@ -683,6 +690,15 @@ class Invoice extends Component {
       });
     }
 
+    updateSessionStorage(){
+      const { scannedFiles, scannedFileData, missingData, xlsxData } = this.state
+
+      sessionStorage.setItem('invoiceScannedFiles', JSON.stringify(scannedFiles))
+      sessionStorage.setItem('invoiceScannedFileData', JSON.stringify(scannedFileData))
+      sessionStorage.setItem('invoiceMissingData', JSON.stringify(missingData))
+      sessionStorage.setItem('invoiceXlsxData', JSON.stringify(xlsxData))
+    }
+
     
     render() { 
         const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
@@ -815,7 +831,7 @@ class Invoice extends Component {
                               changes.forEach(({ cell, row, col, value }) => {
                                 scannedFileData[row][col] = { ...scannedFileData[row][col], value };
                               });
-                              this.setState({ scannedFileData });
+                              this.setState({ scannedFileData }, () => this.updateSessionStorage()); 
                             }}                        
                           />
                           :
@@ -862,7 +878,7 @@ class Invoice extends Component {
                                             title="Invoice Number"
                                             options={data.InvoiceNumber.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                             // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][0].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
+                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][0].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                             closeOnSelect
                                             hasFilter={false}
                                             position={Position.BOTTOM_LEFT}
@@ -876,7 +892,7 @@ class Invoice extends Component {
                                           </SelectMenu> 
                                         </Pane>     
                                         <Pane display='flex' justifyContent='flex-end'>                             
-                                          <TextInput name="text-input-name" placeholder="Invoice Number" value={scannedFileData[data.scannedFileIndex][0].value} onChange={e => {scannedFileData[data.scannedFileIndex][0].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}} />
+                                          <TextInput name="text-input-name" placeholder="Invoice Number" value={scannedFileData[data.scannedFileIndex][0].value} onChange={e => {scannedFileData[data.scannedFileIndex][0].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}} />
                                         </Pane>
                                       </Pane>                                    
                                     </Fragment>
@@ -891,7 +907,7 @@ class Invoice extends Component {
                                             title="Invoice Date"
                                             options={data.Date.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                             // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][1].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
+                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][1].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                             closeOnSelect
                                             hasFilter={false}
                                             position={Position.BOTTOM_LEFT}
@@ -905,7 +921,7 @@ class Invoice extends Component {
                                           </SelectMenu> 
                                         </Pane>     
                                         <Pane display='flex' justifyContent='flex-end'>                             
-                                          <TextInput name="text-input-name" placeholder="Date" value={scannedFileData[data.scannedFileIndex][1].value} onChange={e => {scannedFileData[data.scannedFileIndex][1].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
+                                          <TextInput name="text-input-name" placeholder="Date" value={scannedFileData[data.scannedFileIndex][1].value} onChange={e => {scannedFileData[data.scannedFileIndex][1].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                         </Pane>
                                       </Pane>                                      
                                     </Fragment>
@@ -920,7 +936,7 @@ class Invoice extends Component {
                                             title="Subtotal"
                                             options={data.Subtotal.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                             // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][3].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
+                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][3].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                             closeOnSelect
                                             hasFilter={false}
                                             position={Position.BOTTOM_LEFT}
@@ -934,7 +950,7 @@ class Invoice extends Component {
                                           </SelectMenu> 
                                         </Pane>     
                                         <Pane display='flex' justifyContent='flex-end'>                         
-                                          <TextInput name="text-input-name" placeholder="Subtotal" value={scannedFileData[data.scannedFileIndex][3].value} onChange={e => {scannedFileData[data.scannedFileIndex][3].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}} />
+                                          <TextInput name="text-input-name" placeholder="Subtotal" value={scannedFileData[data.scannedFileIndex][3].value} onChange={e => {scannedFileData[data.scannedFileIndex][3].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}} />
                                         </Pane>                                        
                                       </Pane>
                                     </Fragment>
@@ -949,7 +965,7 @@ class Invoice extends Component {
                                             title="VAT"
                                             options={data.VAT.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                             // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][4].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
+                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][4].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                             closeOnSelect
                                             hasFilter={false}
                                             position={Position.BOTTOM_LEFT}
@@ -963,7 +979,7 @@ class Invoice extends Component {
                                           </SelectMenu> 
                                         </Pane>          
                                         <Pane display='flex' justifyContent='flex-end'>                        
-                                          <TextInput name="text-input-name" placeholder="VAT" value={scannedFileData[data.scannedFileIndex][4].value} onChange={e => {scannedFileData[data.scannedFileIndex][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
+                                          <TextInput name="text-input-name" placeholder="VAT" value={scannedFileData[data.scannedFileIndex][4].value} onChange={e => {scannedFileData[data.scannedFileIndex][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                         </Pane>
                                       </Pane>                                    
                                     </Fragment>
@@ -978,7 +994,7 @@ class Invoice extends Component {
                                             title="Total"
                                             options={data.Total.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                             // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][5].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
+                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][5].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                             closeOnSelect
                                             hasFilter={false}
                                             position={Position.BOTTOM_LEFT}
@@ -992,7 +1008,7 @@ class Invoice extends Component {
                                           </SelectMenu> 
                                         </Pane>    
                                         <Pane display='flex' justifyContent='flex-end'>                            
-                                          <TextInput name="text-input-name" placeholder="Total" value={scannedFileData[data.scannedFileIndex][5].value} onChange={e => {scannedFileData[data.scannedFileIndex][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
+                                          <TextInput name="text-input-name" placeholder="Total" value={scannedFileData[data.scannedFileIndex][5].value} onChange={e => {scannedFileData[data.scannedFileIndex][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                         </Pane>
                                       </Pane>                                     
                                     </Fragment>
