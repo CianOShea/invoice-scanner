@@ -2,6 +2,7 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable no-unused-vars */
 import React, { Component, Fragment } from 'react';
+import { Redirect } from 'react-router-dom';
 import Navbar from '../components/Navbar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
@@ -44,7 +45,10 @@ class Bank extends Component {
       this.myRef = React.createRef();
     
       this.state = {    
-          userToken: '', 
+          pageLoaded: false,
+          userToken: '',
+          isLoggedIn: false,
+          redirect: null,
           paymentID: '',
           appVersion: '-',
           messages: '--',
@@ -113,18 +117,19 @@ class Bank extends Component {
         if (user) {
           db.collection("users").doc(user.uid).get().then((doc) => {
               if (doc.exists) {
-                  console.log("Document data:", doc.data());
-                  this.setState({ userToken: user.uid, paymentID: doc.data().paymentID })               
+                  this.setState({ userToken: user.uid, paymentID: doc.data().paymentID, isLoggedIn: true, pageLoaded: true })               
               } else {
                   // doc.data() will be undefined in this case
                   console.log("No such document!");
               }
           }).catch((error) => {
               console.log("Error getting document:", error);
+              this.setState({ pageLoaded: true, redirect: '/Home' })
           });
         } else {
           // No user is signed in.
           console.log('Not logged In');
+          this.setState({ pageLoaded: true, redirect: '/Home' })
         }
       });
     }
@@ -488,7 +493,15 @@ class Bank extends Component {
 
     
     render() { 
-        const { progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+        const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+
+        if(pageLoaded){
+          if(!isLoggedIn){
+            return (
+              <Redirect to={redirect} />
+            )
+          }
+        }
 
         return ( 
             <div>
