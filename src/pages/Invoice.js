@@ -11,7 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactDataSheet from 'react-datasheet';
 import '../index.css';
 import '../grid.css';
-import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph } from 'evergreen-ui'
+import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph, toaster } from 'evergreen-ui'
 
 import AWS from 'aws-sdk';
 
@@ -52,6 +52,7 @@ class Invoice extends Component {
           isLoggedIn: false,
           redirect: null,
           paymentID: '',
+          scansExceeded: false,
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -90,6 +91,7 @@ class Invoice extends Component {
           sampleScannedFileData: [[{"value":"19762 "},{"value":"22/09/20 "},{"value":""},{"value":""},{"value":"€32.11 "},{"value":""}],[{"value":"000000 "},{"value":"10/07/14 "},{"value":""},{"value":"$4000.00 "},{"value":"$520.00 "},{"value":"4520.00"}],[{"value":""},{"value":""},{"value":""},{"value":152.88},{"value":"32.11 "},{"value":"184.99 "}],[{"value":""},{"value":"2/2/22 "},{"value":""},{"value":""},{"value":""},{"value":""}]]
       }
    }
+
     componentDidMount(){
       window.ipcRenderer.on('test-back', this.handleRenderer)
 
@@ -295,29 +297,51 @@ class Invoice extends Component {
         
     }   
 
+    
+
     async beginScan() {
-      const { unscannedFiles, scannedFiles, missingData } = this.state
+      const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
 
       if(unscannedFiles.length < 1){
           console.log('No files detected');
           return
       }
-      
-      this.setState({ scanComplete: false, isScanning: true })
-      console.log('Start Scan');
-      for(var i=0; i < unscannedFiles.length; i++) {        
-        await this.getFiles(unscannedFiles[i], i)
-        scannedFiles.push(unscannedFiles[i])
-        unscannedFiles[i].scanned = true
-        this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
-        this.updateSessionStorage()
-      }
-      console.log('Scan Complete');
-      if(missingData.length > 0) {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+
+      const teamRef = db.collection("teams").doc(paymentID);
+      const doc = await teamRef.get()
+      if (doc.exists) {
+          const scansCompleted = doc.data().ScansCompleted
+          const maxNumberOfScans = doc.data().MaxNumberOfScans
+          const availableScans = maxNumberOfScans - scansCompleted
+          console.log(availableScans);
+
+          if(availableScans < unscannedFiles.length){ 
+            console.log('Not enough scans');
+            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
+            this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })              
+          } else {      
+            this.setState({ scanComplete: false, isScanning: true })
+            console.log('Start Scan');
+            for(var i=0; i < unscannedFiles.length; i++) {    
+              await this.getFiles(unscannedFiles[i], i)
+              scannedFiles.push(unscannedFiles[i])
+              unscannedFiles[i].scanned = true
+              this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+              this.updateSessionStorage()
+            }
+            console.log('Scan Complete');
+            if(missingData.length > 0) {
+              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+            } else {
+              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
+            }     
+          }
+
       } else {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
-      }      
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+      }
+      
     }
 
     prepareExcel(){
@@ -677,6 +701,10 @@ class Invoice extends Component {
     refresh(){
         this.myRef.current.children[0].value = null
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        sessionStorage.setItem('invoiceScannedFiles', [])
+        sessionStorage.setItem('invoiceScannedFileData', [])
+        sessionStorage.setItem('invoiceMissingData', [])
+        sessionStorage.setItem('invoiceXlsxData', [])
     }
 
 
@@ -862,8 +890,7 @@ class Invoice extends Component {
                         >
                           {
                             missingData.map(((data,index) => ( 
-                              <Fragment key={index} data={data}>
-                                <Pane marginBottom={20}>
+                                <Pane marginBottom={20} key={index} data={data}>
                                   <Pane display='flex' flexDirection='row' marginBottom={10}>
                                     <Heading size={500} marginRight={10}>Filename:</Heading>
                                     <Heading size={500}>{data.fileName.toUpperCase()}</Heading>
@@ -1014,7 +1041,6 @@ class Invoice extends Component {
                                     </Fragment>
                                   }
                                 </Pane>
-                              </Fragment>
                             ))) 
                           }
                           <Button display='flex' margin='auto' marginTop={30} marginBottom={30} onClick={() => this.setState({ missingDataDialog: false })} appearance="primary">Complete</Button>

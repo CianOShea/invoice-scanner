@@ -11,7 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactDataSheet from 'react-datasheet';
 import '../index.css';
 import '../grid.css';
-import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph } from 'evergreen-ui'
+import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph, toaster } from 'evergreen-ui'
 
 import AWS from 'aws-sdk';
 
@@ -50,6 +50,7 @@ class Bank extends Component {
           isLoggedIn: false,
           redirect: null,
           paymentID: '',
+          scansExceeded: false,
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -300,28 +301,48 @@ class Bank extends Component {
     }   
 
     async beginScan() {
-      const { unscannedFiles, scannedFiles, missingData } = this.state
+      const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
 
       if(unscannedFiles.length < 1){
           console.log('No files detected');
           return
       }
-      
-      this.setState({ scanComplete: false, isScanning: true })
-      console.log('Start Scan');
-      for(var i=0; i < unscannedFiles.length; i++) {        
-        await this.getFiles(unscannedFiles[i], i)
-        scannedFiles.push(unscannedFiles[i])
-        unscannedFiles[i].scanned = true
-        this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
-        this.updateSessionStorage()
-      }
-      console.log('Scan Complete');
-      if(missingData.length > 0) {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+
+      const teamRef = db.collection("teams").doc(paymentID);
+      const doc = await teamRef.get()
+      if (doc.exists) {
+          const scansCompleted = doc.data().ScansCompleted
+          const maxNumberOfScans = doc.data().MaxNumberOfScans
+          const availableScans = maxNumberOfScans - scansCompleted
+          console.log(availableScans);
+
+          if(availableScans < unscannedFiles.length){ 
+            console.log('Not enough scans');
+            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
+            this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })              
+          } else {      
+            this.setState({ scanComplete: false, isScanning: true })
+            console.log('Start Scan');
+            for(var i=0; i < unscannedFiles.length; i++) {        
+              await this.getFiles(unscannedFiles[i], i)
+              scannedFiles.push(unscannedFiles[i])
+              unscannedFiles[i].scanned = true
+              this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+              this.updateSessionStorage()
+            }
+            console.log('Scan Complete');
+            if(missingData.length > 0) {
+              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+            } else {
+              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
+            }      
+          }
+
       } else {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
-      }      
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+      }     
+         
     }
 
     prepareExcel(){
@@ -495,6 +516,8 @@ class Bank extends Component {
     refresh(){
         this.myRef.current.children[0].value = null
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        sessionStorage.setItem('bankScannedFiles', [])
+        sessionStorage.setItem('bankXlsxData', [])
     }
 
     deleteS3(targetImage){
