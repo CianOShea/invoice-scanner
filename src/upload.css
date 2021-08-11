@@ -1,6 +1,6 @@
 .files input {
-    outline: 2px dashed #92b0b3;
-    outline-offset: -10px;
+    /* outline: 2px dashed #D1D5DB; */
+    /* outline-offset: -10px; */
     -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
     transition: outline-offset .15s ease-in-out, background-color .15s linear;
     padding: 120px 0px 85px 35%;
@@ -10,11 +10,10 @@
 }
 
 .files input:focus {
-    outline: 2px dashed #92b0b3;
-    outline-offset: -10px;
+    /* outline: 2px dashed #D1D5DB; */
+    /* outline-offset: -10px; */
     -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
     transition: outline-offset .15s ease-in-out, background-color .15s linear;
-    border: 1px solid #92b0b3;
 }
 
 .files {
@@ -30,7 +29,8 @@
     right: 0;
     height: 56px;
     content: "";
-    background-image: url(https://image.flaticon.com/icons/png/128/109/109612.png);
+    /* background-image: url(https://image.flaticon.com/icons/png/128/109/109612.png); */
+    background-image: url(photo.svg);
     display: block;
     margin: 0 auto;
     background-size: 100%;
@@ -43,17 +43,18 @@
 
 .files:before {
     position: absolute;
-    bottom: 10px;
+    bottom: 0px;
     left: 0;
     pointer-events: none;
-    width: 100%;
+    /* width: 100%; */
     right: 0;
-    height: 57px;
-    content: " or drag it here. ";
+    height: 40px;
+    content: "PDF / PNG / JPG";
     display: block;
     margin: 0 auto;
-    color: #2ea591;
-    font-weight: 600;
+    color: #6B7280;
     text-transform: capitalize;
     text-align: center;
+    font-size: 1rem/* 12px */;
+    line-height: 1rem/* 16px */;
 }

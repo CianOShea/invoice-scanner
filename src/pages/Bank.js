@@ -4,6 +4,7 @@
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
 import Navbar from '../components/Navbar'
+import Sidebar from '../components/Sidebar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
 import '../upload.css'
@@ -549,28 +550,36 @@ class Bank extends Component {
         }
 
         return ( 
-            <div>
-                <div>                 
-                    <Navbar/> 
+            <div className='grid md:grid-cols-12 ml-56'>
+                <div className="md:col-span-12">         
 
-                    <Pane padding='50px' paddingTop={10} justifyContent='center' alignItems='center'>  
-                        
+                    <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
+              
 
-                      <Heading size={900}>Bank Statement Scanner</Heading>
+                      <Heading size={900} marginBottom={50}>Bank Scanner</Heading>
 
                       <Form onSubmit={this.handleSubmit}>
-                          <FormGroup>
+                        <FormGroup>                 
 
-                              <FormText color='muted'>Accepted File Types: PNG, JPG, PDF</FormText>                        
+                            <div className="flex text-sm text-gray-600 justify-center">
+                              <label
+                                htmlFor="file-upload"
+                                className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                              >
+                                <span>Upload a file</span>
+                                <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                              </label>
+                              <p className="pl-1">or drag and drop</p>
+                            </div>
 
-                              <div ref= {this.myRef} className='form-group files color'>
-                                  <FileBase64                                     
-                                      multiple={true}
-                                      onDone={this.readFiles.bind(this)}
-                                  />
-                              </div>
-                          </FormGroup>
-                      </Form>
+                            <div ref= {this.myRef} className="files border-2 border-gray-300 border-dashed rounded-md -mt-14">
+                                <FileBase64                                     
+                                    multiple={true}
+                                    onDone={this.readFiles.bind(this)}
+                                />
+                            </div>
+                        </FormGroup>
+                      </Form>    
 
                       <Pane display='flex' justifyContent='center' marginTop={10}>
                         {
@@ -654,6 +663,9 @@ class Bank extends Component {
                         
                       </Pane>           
 
+                      <div className='w-full h-full'>
+                      <div className='overflow-scroll'>
+
                       <ReactDataSheet
                         data={this.state.header}
                         valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
@@ -683,7 +695,9 @@ class Bank extends Component {
                               this.setState({ grid });
                             }}                        
                           />
-                      }          
+                      }       
+                      </div>
+                      </div>   
                     </Pane>
                     
                     {

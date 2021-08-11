@@ -6,11 +6,14 @@ import Login from './pages/Login';
 import Navbar from './components/Navbar';
 import { Route, Switch, Redirect  } from 'react-router-dom';
 
+import Sidebar from './components/Sidebar';
+
 export const Routes = () => {
 
   return (
     <div>
       {/* <Navbar /> */}
+      <Sidebar/>
       <Switch>
         <Route exact path="/Home" component={Home} />
           <Route exact path="/">

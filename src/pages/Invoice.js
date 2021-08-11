@@ -4,6 +4,7 @@
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
 import Navbar from '../components/Navbar'
+import Sidebar from '../components/Sidebar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
 import '../upload.css'
@@ -68,14 +69,15 @@ class Invoice extends Component {
           imageDataURL: null,
           sortedForm: {},
           header: [
-            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
+            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' },{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
           ],
           grid: [
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            
           ],
           missingDataDialog: false,
           cornerDialog: false,
@@ -741,27 +743,40 @@ class Invoice extends Component {
 
         return ( 
             <div>
-                <div>      
 
-                    <Navbar/>           
+                <div className='grid md:grid-cols-12 ml-56'>
 
-                    <Pane padding='50px' paddingTop={10} justifyContent='center' alignItems='center'>                          
+                <div className="md:col-span-12">    
 
-                      <Heading size={900}>Invoice Scanner</Heading>
+                    <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
+
+                      <div>                      
+
+                      <Heading size={900} marginBottom={50}>Invoice Scanner</Heading>
 
                       <Form onSubmit={this.handleSubmit}>
-                          <FormGroup>
+                        <FormGroup>                 
 
-                              <FormText color='muted'>Accepted File Types: PNG, JPG, PDF</FormText>                        
+                            <div className="flex text-sm text-gray-600 justify-center">
+                              <label
+                                htmlFor="file-upload"
+                                className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                              >
+                                <span>Upload a file</span>
+                                <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                              </label>
+                              <p className="pl-1">or drag and drop</p>
+                            </div>
 
-                              <div ref= {this.myRef} className='form-group files color'>
-                                  <FileBase64                                     
-                                      multiple={true}
-                                      onDone={this.readFiles.bind(this)}
-                                  />
-                              </div>
-                          </FormGroup>
-                      </Form>
+                            <div ref= {this.myRef} className="files border-2 border-gray-300 border-dashed rounded-md -mt-14">
+                                <FileBase64                                     
+                                    multiple={true}
+                                    onDone={this.readFiles.bind(this)}
+                                />
+                            </div>
+                        </FormGroup>
+                      </Form>                     
+
 
                       <Pane display='flex' justifyContent='center' marginTop={10}>
                         {
@@ -780,7 +795,7 @@ class Invoice extends Component {
                       </Pane>
 
               
-                      <Pane  margin='auto' paddingBottom='50px' display='flex' flexDirection='row'>
+                      <Pane margin='auto' paddingBottom='50px' display='flex' flexDirection='row'>
                         <Pane width='50%' display='flex' flexDirection='column' padding={20}>
                           <Heading size={700}>Unscanned Files</Heading>
                           
@@ -843,8 +858,12 @@ class Invoice extends Component {
                             <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
                         }        
                         
-                      </Pane>           
+                      </Pane>  
 
+                      </div>         
+
+                      <div className='w-full h-full'>
+                      <div className='overflow-scroll'>
                       <ReactDataSheet
                         data={this.state.header}
                         valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
@@ -874,7 +893,12 @@ class Invoice extends Component {
                               this.setState({ grid });
                             }}                        
                           />
-                      }          
+                      }     
+
+                      </div>
+                      </div>   
+
+
                     </Pane>
                     
                     {
@@ -1058,6 +1082,7 @@ class Invoice extends Component {
                         <Button onClick={() => this.setState({ cornerDialog: false, missingDataDialog: true })} appearance="primary">Verify Missing Data</Button>
                       </Pane>
                     </CornerDialog>
+                </div>
                 </div>
             </div>
          );
