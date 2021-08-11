@@ -69,14 +69,14 @@ class Invoice extends Component {
           imageDataURL: null,
           sortedForm: {},
           header: [
-            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' },{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
+            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
           ],
           grid: [
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' },{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
+            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
             
           ],
           missingDataDialog: false,
@@ -751,7 +751,7 @@ class Invoice extends Component {
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
 
                       <div>                      
-
+                      
                       <Heading size={900} marginBottom={50}>Invoice Scanner</Heading>
 
                       <Form onSubmit={this.handleSubmit}>
@@ -863,7 +863,7 @@ class Invoice extends Component {
                       </div>         
 
                       <div className='w-full h-full'>
-                      <div className='overflow-scroll'>
+                      <div className='overflow-auto p-2'>
                       <ReactDataSheet
                         data={this.state.header}
                         valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      

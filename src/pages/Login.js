@@ -27,7 +27,7 @@ export default class login extends Component {
         firebase.auth().signInWithEmailAndPassword(email, password)
         .then((result) => {
             Cookie.set('token', result.user.uid);     
-            this.props.history.push('/Invoice') 
+            this.props.history.push('/Home') 
         })
         .catch((error) => {
             console.log(error)
@@ -43,7 +43,6 @@ export default class login extends Component {
         const { email, password } = this.state
         return (
             <div>
-            <Navbar/> 
             <div className="flex max-w-sm mx-auto overflow-hidden place-content-center bg-white rounded-lg shadow-lg dark:bg-gray-800 lg:max-w-4xl">
                 
                 <div className="w-full px-6 py-8 md:px-8 lg:w-1/2">
