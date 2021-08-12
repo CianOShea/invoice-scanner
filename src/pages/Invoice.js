@@ -269,7 +269,7 @@ class Invoice extends Component {
                 sortedForm.sort(function(a, b) {
                     return a.Top - b.Top;
                 });
-                console.log(sortedForm)
+                // console.log(sortedForm)
                 // console.log(JSON.stringify(sortedForm))
                 
                 var form = []
@@ -286,8 +286,7 @@ class Invoice extends Component {
               
                 this.setState({ formData: lambdaData.body.kv, keyMap: lambdaData.body.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData })
               }
-              this.prepareAllCSV()
-              this.updateScanNumber()
+              this.prepareAllCSV()              
               this.deleteS3(targetImage)
             }
 
@@ -299,6 +298,37 @@ class Invoice extends Component {
         
     }   
 
+    async getCurrentScanNumber(){
+      const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
+      
+      const teamRef = db.collection("teams").doc(paymentID);
+      const doc = await teamRef.get()
+      if (doc.exists) {
+          console.log(doc.data());
+          var scansCompleted = doc.data().ScansCompleted
+          var maxNumberOfScans = doc.data().MaxNumberOfScans
+          var availableScans = maxNumberOfScans - scansCompleted
+          console.log(availableScans);
+
+          if(availableScans < 1){ 
+            console.log('Not enough scans');
+            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
+            this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })  
+
+            return false           
+          } else {      
+            this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles, scanComplete: false, isScanning: true })
+            var increment = scansCompleted + 1
+            teamRef.update({ ScansCompleted: increment });
+            return true               
+          }
+
+      } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+          return false
+      }
+    }
     
 
     async beginScan() {
@@ -309,40 +339,28 @@ class Invoice extends Component {
           return
       }
 
-      const teamRef = db.collection("teams").doc(paymentID);
-      const doc = await teamRef.get()
-      if (doc.exists) {
-          const scansCompleted = doc.data().ScansCompleted
-          const maxNumberOfScans = doc.data().MaxNumberOfScans
-          const availableScans = maxNumberOfScans - scansCompleted
-          console.log(availableScans);
-
-          if(availableScans < unscannedFiles.length){ 
-            console.log('Not enough scans');
-            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
-            this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })              
-          } else {      
-            this.setState({ scanComplete: false, isScanning: true })
-            console.log('Start Scan');
-            for(var i=0; i < unscannedFiles.length; i++) {    
-              await this.getFiles(unscannedFiles[i], i)
-              scannedFiles.push(unscannedFiles[i])
-              unscannedFiles[i].scanned = true
-              this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
-              this.updateSessionStorage()
-            }
-            console.log('Scan Complete');
-            if(missingData.length > 0) {
-              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
-            } else {
-              this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
-            }     
-          }
-
-      } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
+      this.setState({ scanComplete: false, isScanning: true })
+      console.log('Start Scan');
+      for(var i=0; i < unscannedFiles.length; i++) {    
+        var canScan = await this.getCurrentScanNumber() 
+        if(canScan){
+          await this.getFiles(unscannedFiles[i], i)
+          scannedFiles.push(unscannedFiles[i])
+          unscannedFiles[i].scanned = true
+          this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+          this.updateUserScanNumber()
+          this.updateSessionStorage()
+        } else {
+          console.log("Can't Scan");
+        }
+        
       }
+      console.log('Scan Complete');
+      if(missingData.length > 0) {
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+      } else {
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
+      }  
       
     }
 
@@ -418,7 +436,7 @@ class Invoice extends Component {
       }       
       
       this.setState({ xlsxData: xlsxData })
-      console.log(xlsxData);
+      // console.log(xlsxData);
     }
 
 
@@ -496,8 +514,8 @@ class Invoice extends Component {
     findInvoiceDate(sortedForm, index){
       const { unscannedFiles, missingData } = this.state
 
-      console.log(sortedForm);
-      console.log(index);
+      // console.log(sortedForm);
+      // console.log(index);
       var dateSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))     
 
       if (dateSearch.length === 0){
@@ -541,8 +559,8 @@ class Invoice extends Component {
     findInvoiceNumber(sortedForm, index){
       const { unscannedFiles, missingData } = this.state
 
-      console.log(sortedForm);
-      console.log(index);
+      // console.log(sortedForm);
+      // console.log(index);
       var invoiceSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('INVOICE') && !data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))
 
       if (invoiceSearch.length === 0){
@@ -586,11 +604,11 @@ class Invoice extends Component {
     findInvoiceTotal(sortedForm, index){
       const { unscannedFiles, missingData } = this.state
 
-      console.log(sortedForm);
-      console.log(index);
+      // console.log(sortedForm);
+      // console.log(index);
 
       var vatSearch = sortedForm.filter(data => /\d/.test(JSON.stringify(data.Value).replace(/\s/g, '')) && JSON.stringify(data.Value).replace(/\s/g, '').includes('.') && !/[a-zA-Z]/.test(JSON.stringify(data.Value).replace(/\s/g, '')))
-      console.log(vatSearch);
+      // console.log(vatSearch);
     
       var sampleIncludes = ['V.A.T.', 'V.A.T', 'TAX', 'VAT']
       var includeVarsArr = []
@@ -655,7 +673,7 @@ class Invoice extends Component {
         var multiSUBTOTAL = [].concat.apply([], includeVarsArr)
         multiSUBTOTAL = [...new Set(multiSUBTOTAL)]
       } 
-      console.log(multiSUBTOTAL);
+      // console.log(multiSUBTOTAL);
       if(multiSUBTOTAL.length === 1){
         var invoiceSUBTOTAL = multiSUBTOTAL[0]
       } 
@@ -690,14 +708,11 @@ class Invoice extends Component {
       return allInvoiceNumbers
     }
 
-    updateScanNumber(){
+    updateUserScanNumber(){
       const { userToken, paymentID } = this.state
       const increment = firebase.firestore.FieldValue.increment(1);
       const userRef = db.collection("users").doc(userToken);
       userRef.update({ NoOfScans: increment });  
-
-      const teamRef = db.collection("teams").doc(paymentID);
-      teamRef.update({ ScansCompleted: increment });
     }
 
     refresh(){
