@@ -38,13 +38,12 @@ function Sidebar(props) {
             // An error happened.
         });
     }
-    console.log(props);
     return (
-        <div className="flex flex-col w-56 h-screen px-4 py-8 bg-gray-800 border-r dark:bg-gray-800 dark:border-gray-600 fixed z-40">
+        <div className="flex flex-col w-56 h-screen px-4 py-8 bg-gray-800 border-r dark:bg-gray-800 dark:border-gray-600 fixed z-10">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full" viewBox="0 0 24 24">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
             </svg>
-            <Link onClick={() => setCurrentTab('Home')} to="/Home" className="no-underline flex title-font font-medium items-center text-gray-900 md:mb-0">                
+            <Link to="/Home" className="no-underline flex title-font font-medium items-center text-gray-900 md:mb-0">                
                 <h2 className='text-2xl font-semibold text-white dark:text-white' >Scanner App</h2>
             </Link>       
             <div className="flex flex-col justify-between flex-1 mt-6">
@@ -52,7 +51,7 @@ function Sidebar(props) {
                 {
                      isLoggedIn &&
                     <Fragment>
-                        <Link onClick={() => setCurrentTab('Invoice')} className={`no-underline flex items-center px-4 py-2 text-white ${currentTab === 'Invoice' && "bg-blue-600"} rounded-md dark:bg-gray-700 dark:text-gray-200 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Invoice">    
+                        <Link className={`no-underline flex items-center px-4 py-2 text-white ${props.currentTab === 'Invoice' && "bg-blue-600"} rounded-md dark:bg-gray-700 dark:text-gray-200 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Invoice">    
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M19 11H5M19 11C20.1046 11 21 11.8954 21 13V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13C3 11.8954 3.89543 11 5 11M19 11V9C19 7.89543 18.1046 7 17 7M5 11V9C5 7.89543 5.89543 7 7 7M7 7V5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7M7 7H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
@@ -60,7 +59,7 @@ function Sidebar(props) {
                         </Link>
                         
 
-                        <Link onClick={() => setCurrentTab('Bank')} className={`no-underline flex items-center px-4 py-2 mt-5 text-white ${currentTab === 'Bank' && "bg-blue-600"} transition-colors duration-200 transform rounded-md dark:text-gray-400 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Bank">    
+                        <Link className={`no-underline flex items-center px-4 py-2 mt-5 text-white ${props.currentTab === 'Bank' && "bg-blue-600"} transition-colors duration-200 transform rounded-md dark:text-gray-400 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Bank">    
                             <FontAwesomeIcon icon={faWallet} />
                             <span className="mx-4 font-medium text-white">Bank</span>
                         </Link>   
@@ -68,7 +67,7 @@ function Sidebar(props) {
                 }
                 {
                 !isLoggedIn &&
-                    <Link onClick={() => setCurrentTab('Login')} className={`no-underline flex items-center px-4 py-2 text-white ${currentTab === 'Login' && "bg-blue-600"} rounded-md dark:bg-gray-700 dark:text-gray-200 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Login">    
+                    <Link onClick={() => setCurrentTab('Login')} className={`no-underline flex items-center px-4 py-2 text-white ${props.currentTab === 'Login' && "bg-blue-600"} rounded-md dark:bg-gray-700 dark:text-gray-200 hover:bg-blue-600 dark:hover:bg-gray-700 dark:hover:text-gray-200 hover:text-white`} to="/Login">    
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 11H5M19 11C20.1046 11 21 11.8954 21 13V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13C3 11.8954 3.89543 11 5 11M19 11V9C19 7.89543 18.1046 7 17 7M5 11V9C5 7.89543 5.89543 7 7 7M7 7V5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7M7 7H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>

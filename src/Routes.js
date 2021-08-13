@@ -13,7 +13,7 @@ export const Routes = () => {
   return (
     <div>
       {/* <Navbar /> */}
-      <Sidebar/>
+      {/* <Sidebar/> */}
       <Switch>
         <Route exact path="/Home" component={Home} />
           <Route exact path="/">

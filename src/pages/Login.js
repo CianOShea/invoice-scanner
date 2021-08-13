@@ -7,11 +7,11 @@ import Cookie from 'js-cookie'
 export default class login extends Component {
 
     constructor(props) {
-    super(props);
-    this.state = { 
-      email: '',
-      password: '',
-      };
+        super(props);
+        this.state = { 
+        email: '',
+        password: '',
+        };
     }
 
     onChange(e){

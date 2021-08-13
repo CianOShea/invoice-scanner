@@ -566,8 +566,12 @@ class Bank extends Component {
         }
 
         return ( 
-            <div className='grid md:grid-cols-12 ml-56'>
-                <div className="md:col-span-12">         
+            <div className='grid grid-cols-12'>
+                <div className="col-span-2">
+                  <Sidebar currentTab={'Bank'} />
+                </div>  
+
+                <div className="col-span-10">      
 
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
               
