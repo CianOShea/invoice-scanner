@@ -87,6 +87,22 @@ ipcMain.on('test', (event, arg) => {
   mainWindow.send('test-back', 'pong')
 })
 
+ipcMain.on('open-install-window', (event, arg) => {
+  console.log('Open Window');
+  installScreen = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: true, webPreferences: { nodeIntegration: true }});
+  installScreen.loadURL(`file://${__dirname}/installWindow.html`);
+  installScreen.show()
+})
+
+ipcMain.on('install-update-now', (event, arg) => {
+  app.relaunch();
+  app.exit(0);
+})
+
+ipcMain.on('install-update-later', (event, arg) => {
+  installScreen.destroy();
+})
+
 autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   const dialogOpts = {
     type: 'info',

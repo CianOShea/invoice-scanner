@@ -12,6 +12,7 @@ export class Home extends Component {
 
                 <div className="col-span-10">
                     Home
+                    <button onClick={() => {window.ipcRenderer.send('open-install-window', 'ping')}}>Open Install</button>
                 </div>
             </div>
         )
