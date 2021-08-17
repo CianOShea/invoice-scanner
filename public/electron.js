@@ -42,6 +42,7 @@ function createWindow() {
     
     // once the window is ready show it
     mainWindow.on('ready-to-show', () => {
+        splash.destroy();
         mainWindow.show();
     });
 
@@ -62,8 +63,14 @@ setInterval(() => {
   })
 }, 60000)
 
+let splash
+
 // once electron app is ready, createWindow
 app.on('ready', () => {
+  
+  splash = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: false});
+  splash.loadURL(`file://${__dirname}/splash.html`);
+
   
   createWindow()
 
