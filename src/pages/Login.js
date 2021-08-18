@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar'
 import { Link, withRouter } from 'react-router-dom';
 import firebase from '../firebase/firebase'
 import Cookie from 'js-cookie'
+import Sidebar from '../components/Sidebar'
 
 export default class login extends Component {
 
@@ -43,6 +44,7 @@ export default class login extends Component {
         const { email, password } = this.state
         return (
             <div>
+            <Sidebar/>
             <div className="flex max-w-sm mx-auto overflow-hidden place-content-center bg-white rounded-lg shadow-lg dark:bg-gray-800 lg:max-w-4xl">
                 
                 <div className="w-full px-6 py-8 md:px-8 lg:w-1/2">

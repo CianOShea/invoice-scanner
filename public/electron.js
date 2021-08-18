@@ -68,7 +68,7 @@ let splash
 // once electron app is ready, createWindow
 app.on('ready', () => {
   
-  splash = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: false});
+  splash = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: true});
   splash.loadURL(`file://${__dirname}/splash.html`);
 
   
@@ -115,6 +115,10 @@ autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
   dialog.showMessageBox(dialogOpts).then((returnValue) => {
     if (returnValue.response === 0) autoUpdater.quitAndInstall()
   })
+  
+  installScreen = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: true, webPreferences: { nodeIntegration: true }});
+  installScreen.loadURL(`file://${__dirname}/installWindow.html`);
+  installScreen.show()
 })
 
 autoUpdater.on('error', message => {
