@@ -170,6 +170,7 @@ class Invoice extends Component {
         
         if(unscannedFiles.length < 1){
           console.log('No files detected');
+          toaster.notify('No files detected')
           return
         }
         
@@ -337,6 +338,7 @@ class Invoice extends Component {
 
       if(unscannedFiles.length < 1){
           console.log('No files detected');
+          toaster.notify('No files detected')
           return
       }
 
@@ -357,10 +359,11 @@ class Invoice extends Component {
         
       }
       console.log('Scan Complete');
+      unscannedFiles.filter(file => file.scanned === false)
       if(missingData.length > 0) {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles, cornerDialog: true })
       } else {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles })
       }  
       
     }
@@ -439,7 +442,6 @@ class Invoice extends Component {
       this.setState({ xlsxData: xlsxData })
       // console.log(xlsxData);
     }
-
 
     async readFiles(files){
       if(!files){
@@ -749,7 +751,7 @@ class Invoice extends Component {
     render() { 
         const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
         
-        console.log(sampleMissingData)
+        console.log(scannedFileData)
 
         if(pageLoaded){
           if(!isLoggedIn){
@@ -830,14 +832,21 @@ class Invoice extends Component {
                                 <Fragment>
                                   {
                                     unscannedFiles.map((file,index) => (  
-                                          <Table.Row key={index} file={file}>
+                                          <div key={index} file={file}>
+                                          {
+                                            file.scanned === false &&
+                                          
+                                          <Table.Row>
+                                            <Table.TextCell isNumber flexBasis={50} flexShrink={0} flexGrow={0}>{index + 1}</Table.TextCell>
                                             <Table.TextCell>{file.fileName}</Table.TextCell>
                                             {/* <Table.TextCell>{file.scanned == false ? 'Not Scanned' : 'Scanned'}</Table.TextCell> */}
                                             {
                                               !isScanning &&
                                               <Button intent='danger' appearance="primary" margin='auto' marginRight='50px' onClick={() => this.removeFile(index)}>Remove</Button>
                                             }                                            
-                                          </Table.Row>                             
+                                          </Table.Row> 
+    }
+                                          </div>                            
                                     ))
                                   }
                                 </Fragment>
@@ -858,6 +867,7 @@ class Invoice extends Component {
                                 {
                                   scannedFiles.map((file,index) => (  
                                         <Table.Row key={index} file={file}>
+                                          <Table.TextCell isNumber flexBasis={50} flexShrink={0} flexGrow={0}>{index + 1}</Table.TextCell>
                                           <Table.TextCell>{file.fileName}</Table.TextCell>
                                         </Table.Row>                             
                                   ))
@@ -875,10 +885,8 @@ class Invoice extends Component {
                           missingData.length > 0 &&
                             <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
                         }              
-                        {
-                          scannedFileData.length > 0 &&
-                            <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
-                        }        
+                        <Button disabled={isScanning} intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
+                              
                         
                       </Pane>  
 
@@ -922,6 +930,9 @@ class Invoice extends Component {
 
 
                     </Pane>
+                    
+                    {
+                      scanComplete &&
                     
 
                     <Dialog
@@ -1098,6 +1109,7 @@ class Invoice extends Component {
                       <Button display='flex' margin='auto' marginTop={30} marginBottom={30} onClick={() => this.setState({ missingDataDialog: false })} appearance="primary">Complete</Button>
                       
                     </Dialog>
+                    }
 
                     <CornerDialog
                       title="Missing Data"
