@@ -314,7 +314,7 @@ class Invoice extends Component {
 
           if(availableScans < 1){ 
             console.log('Not enough scans');
-            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
+            toaster.notify(`Maximum scans reached. Available Scans: ${availableScans}`)
             this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })  
 
             return false           
@@ -355,6 +355,7 @@ class Invoice extends Component {
           this.updateSessionStorage()
         } else {
           console.log("Can't Scan");
+          return
         }
         
       }
@@ -882,7 +883,7 @@ class Invoice extends Component {
 
                       <Pane display='flex' justifyContent='center' marginBottom={10}>
                         {
-                          missingData.length > 0 &&
+                          !isScanning && missingData.length > 0 &&
                             <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
                         }              
                         <Button disabled={isScanning} intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
@@ -932,7 +933,7 @@ class Invoice extends Component {
                     </Pane>
                     
                     {
-                      scanComplete &&
+                      !isScanning && missingData.length > 0 &&
                     
 
                     <Dialog

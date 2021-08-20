@@ -163,6 +163,7 @@ class Bank extends Component {
         
         if(unscannedFiles.length < 1){
           console.log('No files detected');
+          toaster.notify('No files detected')
           return
         }
         
@@ -314,7 +315,7 @@ class Bank extends Component {
 
           if(availableScans < 1){ 
             console.log('Not enough scans');
-            toaster.notify(`Not enough scans available. Available Scans: ${availableScans}`)
+            toaster.notify(`Maximum scans reached. Available Scans: ${availableScans}`)
             this.setState({ scanComplete: true, isScanning: false, scansExceeded: true })  
 
             return false           
@@ -337,6 +338,7 @@ class Bank extends Component {
 
       if(unscannedFiles.length < 1){
           console.log('No files detected');
+          toaster.notify('No files detected')
           return
       }
 
@@ -353,14 +355,16 @@ class Bank extends Component {
           this.updateSessionStorage()
         } else {
           console.log("Can't Scan");
+          return
         }
         
       }
       console.log('Scan Complete');
+      unscannedFiles.filter(file => file.scanned === false)
       if(missingData.length > 0) {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [], cornerDialog: true })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles, cornerDialog: true })
       } else {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: [] })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles })
       }  
       
     }
@@ -631,14 +635,20 @@ class Bank extends Component {
                                 <Fragment>
                                   {
                                     unscannedFiles.map((file,index) => (  
-                                          <Table.Row key={index} file={file}>
+                                      <div key={index} file={file}>
+                                      {
+                                        file.scanned === false &&
+                                          <Table.Row>
+                                            <Table.TextCell isNumber flexBasis={50} flexShrink={0} flexGrow={0}>{index + 1}</Table.TextCell>
                                             <Table.TextCell>{file.fileName}</Table.TextCell>
                                             {/* <Table.TextCell>{file.scanned == false ? 'Not Scanned' : 'Scanned'}</Table.TextCell> */}
                                             {
                                               !isScanning &&
                                               <Button intent='danger' appearance="primary" margin='auto' marginRight='50px' onClick={() => this.removeFile(index)}>Remove</Button>
                                             }                                            
-                                          </Table.Row>                             
+                                          </Table.Row>
+                                      }
+                                      </div>                          
                                     ))
                                   }
                                 </Fragment>
@@ -659,6 +669,7 @@ class Bank extends Component {
                                 {
                                   scannedFiles.map((file,index) => (  
                                         <Table.Row key={index} file={file}>
+                                          <Table.TextCell isNumber flexBasis={50} flexShrink={0} flexGrow={0}>{index + 1}</Table.TextCell>
                                           <Table.TextCell>{file.fileName}</Table.TextCell>
                                         </Table.Row>                             
                                   ))
@@ -676,10 +687,7 @@ class Bank extends Component {
                           missingData.length > 0 &&
                             <Button marginRight={30} onClick={() => this.setState({ missingDataDialog: true })} appearance="primary">Find Missing Data</Button> 
                         }              
-                        {
-                          xlsxData.length > 0 &&
-                            <Button intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>  
-                        }        
+                        <Button disabled={isScanning} intent='success' appearance="primary" onClick={() => this.prepareExcel()} marginRight={20}>Convert to EXCEL</Button>        
                         
                       </Pane>           
 
@@ -718,191 +726,8 @@ class Bank extends Component {
                       }       
                       </div>
                       </div>   
-                    </Pane>
-                    
-                    {
-                      scanComplete &&                    
-
-                        <Dialog
-                          isShown={missingDataDialog}
-                          title="Missing Data"
-                          onCloseComplete={() => this.setState({ missingDataDialog: false })}
-                          hasFooter={false}
-                          preventBodyScrolling
-                          width='60%'
-                        >
-                          {
-                            missingData.map(((data,index) => ( 
-                              <Fragment key={index} data={data}>
-                                <Pane marginBottom={20}>
-                                  <Pane display='flex' flexDirection='row' marginBottom={10}>
-                                    <Heading size={500} marginRight={10}>Filename:</Heading>
-                                    <Heading size={500}>{data.fileName.toUpperCase()}</Heading>
-                                  </Pane>
-                                  {
-                                    data.InvoiceNumber &&
-                                    <Fragment>
-                                      <Heading size={500}>Invoice Number:</Heading>
-                                      <Pane display='flex' flexDirection='row'>
-                                        <Pane marginRight={30}>
-                                          <SelectMenu
-                                            title="Invoice Number"
-                                            options={data.InvoiceNumber.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                            // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][0].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
-                                            closeOnSelect
-                                            hasFilter={false}
-                                            position={Position.BOTTOM_LEFT}
-                                            emptyView={
-                                              <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                                <Text size={300}>NO OPTIONS FOUND</Text>
-                                              </Pane>
-                                            }
-                                          >
-                                            <Button>{'Select Invoice Number...'}</Button>
-                                          </SelectMenu> 
-                                        </Pane>     
-                                        <Pane display='flex' justifyContent='flex-end'>                             
-                                          <TextInput name="text-input-name" placeholder="Invoice Number" value={scannedFileData[data.scannedFileIndex][0].value} onChange={e => {scannedFileData[data.scannedFileIndex][0].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}} />
-                                        </Pane>
-                                      </Pane>                                    
-                                    </Fragment>
-                                  }
-                                  {
-                                    data.Date &&
-                                    <Fragment>
-                                    <Heading size={500}>Invoice Date:</Heading>
-                                      <Pane display='flex' flexDirection='row'>
-                                        <Pane marginRight={30}>
-                                          <SelectMenu
-                                            title="Invoice Date"
-                                            options={data.Date.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                            // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][1].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
-                                            closeOnSelect
-                                            hasFilter={false}
-                                            position={Position.BOTTOM_LEFT}
-                                            emptyView={
-                                              <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                                <Text size={300}>NO OPTIONS FOUND</Text>
-                                              </Pane>
-                                            }
-                                          >
-                                            <Button>{'Select Invoice Date...'}</Button>
-                                          </SelectMenu> 
-                                        </Pane>     
-                                        <Pane display='flex' justifyContent='flex-end'>                             
-                                          <TextInput name="text-input-name" placeholder="Date" value={scannedFileData[data.scannedFileIndex][1].value} onChange={e => {scannedFileData[data.scannedFileIndex][1].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
-                                        </Pane>
-                                      </Pane>                                      
-                                    </Fragment>
-                                  }
-                                  {
-                                    data.Subtotal &&
-                                    <Fragment>
-                                      <Heading size={500}>Subtotal:</Heading>
-                                      <Pane display='flex' flexDirection='row'>
-                                        <Pane marginRight={30}>
-                                          <SelectMenu
-                                            title="Subtotal"
-                                            options={data.Subtotal.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                            // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][3].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
-                                            closeOnSelect
-                                            hasFilter={false}
-                                            position={Position.BOTTOM_LEFT}
-                                            emptyView={
-                                              <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                                <Text size={300}>NO OPTIONS FOUND</Text>
-                                              </Pane>
-                                            }
-                                          >
-                                            <Button>{'Select Subtotal...'}</Button>
-                                          </SelectMenu> 
-                                        </Pane>     
-                                        <Pane display='flex' justifyContent='flex-end'>                         
-                                          <TextInput name="text-input-name" placeholder="Subtotal" value={scannedFileData[data.scannedFileIndex][3].value} onChange={e => {scannedFileData[data.scannedFileIndex][3].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}} />
-                                        </Pane>                                        
-                                      </Pane>
-                                    </Fragment>
-                                  }
-                                  {
-                                    data.VAT &&
-                                    <Fragment>
-                                    <Heading size={500}>VAT:</Heading>
-                                      <Pane display='flex' flexDirection='row'>
-                                        <Pane marginRight={30}>
-                                          <SelectMenu
-                                            title="VAT"
-                                            options={data.VAT.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                            // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][4].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
-                                            closeOnSelect
-                                            hasFilter={false}
-                                            position={Position.BOTTOM_LEFT}
-                                            emptyView={
-                                              <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                                <Text size={300}>NO OPTIONS FOUND</Text>
-                                              </Pane>
-                                            }
-                                          >
-                                            <Button>{'Select VAT...'}</Button>
-                                          </SelectMenu> 
-                                        </Pane>          
-                                        <Pane display='flex' justifyContent='flex-end'>                        
-                                          <TextInput name="text-input-name" placeholder="VAT" value={scannedFileData[data.scannedFileIndex][4].value} onChange={e => {scannedFileData[data.scannedFileIndex][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
-                                        </Pane>
-                                      </Pane>                                    
-                                    </Fragment>
-                                  }
-                                  {
-                                    data.Total &&
-                                    <Fragment>
-                                    <Heading size={500}>Total:</Heading>
-                                      <Pane display='flex' flexDirection='row'>
-                                        <Pane marginRight={30}>
-                                          <SelectMenu
-                                            title="Total"
-                                            options={data.Total.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                            // selected={selected}
-                                            onSelect={(item) => {scannedFileData[data.scannedFileIndex][5].value = item.value.Value; this.setState({ scannedFileData: scannedFileData })}}
-                                            closeOnSelect
-                                            hasFilter={false}
-                                            position={Position.BOTTOM_LEFT}
-                                            emptyView={
-                                              <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                                <Text size={300}>NO OPTIONS FOUND</Text>
-                                              </Pane>
-                                            }
-                                          >
-                                            <Button>{'Select Total...'}</Button>
-                                          </SelectMenu> 
-                                        </Pane>    
-                                        <Pane display='flex' justifyContent='flex-end'>                            
-                                          <TextInput name="text-input-name" placeholder="Total" value={scannedFileData[data.scannedFileIndex][5].value} onChange={e => {scannedFileData[data.scannedFileIndex][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData })}}/>
-                                        </Pane>
-                                      </Pane>                                     
-                                    </Fragment>
-                                  }
-                                </Pane>
-                              </Fragment>
-                            ))) 
-                          }
-                          <Button display='flex' margin='auto' marginTop={30} marginBottom={30} onClick={() => this.setState({ missingDataDialog: false })} appearance="primary">Complete</Button>
-                        </Dialog>                          
-                    }
-                    <CornerDialog
-                      title="Missing Data"
-                      isShown={cornerDialog}
-                      onCloseComplete={() =>this.setState({ cornerDialog: false })}
-                      hasFooter={false}
-                    >
-                      Some data could not be found or verifed.
-                      <Pane display='flex' flexDirection='row' justifyContent='flex-end' paddingTop={20}>
-                        <Button marginRight={20} onClick={() => this.setState({ cornerDialog: false })} >Close</Button>
-                        <Button onClick={() => this.setState({ cornerDialog: false, missingDataDialog: true })} appearance="primary">Verify Missing Data</Button>
-                      </Pane>
-                    </CornerDialog>
+                    </Pane>                   
+             
                 </div>
             </div>
          );

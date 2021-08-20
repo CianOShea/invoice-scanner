@@ -43,6 +43,7 @@ function createWindow() {
     // once the window is ready show it
     mainWindow.on('ready-to-show', () => {
         splash.destroy();
+        mainWindow.maximize()
         mainWindow.show();
     });
 
@@ -68,7 +69,7 @@ let splash
 // once electron app is ready, createWindow
 app.on('ready', () => {
   
-  splash = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: true});
+  splash = new BrowserWindow({width: 810, height: 810, transparent: true, frame: false, alwaysOnTop: false});
   splash.loadURL(`file://${__dirname}/splash.html`);
 
   
