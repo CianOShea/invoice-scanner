@@ -81,7 +81,7 @@ function Sidebar(props) {
                                 <button onClick={() => signOut()} className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-2 lg:px-8 focus:outline-none hover:bg-indigo-600 lg:rounded rounded-full text-lg">
                                     <Tooltip content="Sign Out" position={Position.RIGHT}>    
                                         <div className='flex content-center items-center'>                                                                        
-                                            <FontAwesomeIcon icon={faSignInAlt} className="h-6 w-6 text-white hover:text-indigo-600 transition duration-200 lg:mr-2"/>  
+                                            <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6 text-white hover:text-indigo-600 transition duration-200 lg:mr-2"/>  
                                             <span className='hidden lg:flex font-semibold text-white dark:text-white'>Sign Out</span>
                                         </div>
                                     </Tooltip>
@@ -97,7 +97,7 @@ function Sidebar(props) {
                                     <button className="flex mx-auto text-white bg-indigo-500 border-0 py-2 px-2 lg:px-8 focus:outline-none hover:bg-indigo-600 lg:rounded rounded-full text-lg">
                                         <Tooltip content="Login" position={Position.RIGHT}>  
                                             <div className='flex content-center items-center'>                                              
-                                                <FontAwesomeIcon icon={faSignOutAlt} className="h-6 w-6 text-white hover:text-indigo-600 transition duration-200 lg:mr-2"/>                   
+                                                <FontAwesomeIcon icon={faSignInAlt} className="h-6 w-6 text-white hover:text-indigo-600 transition duration-200 lg:mr-2"/>                   
                                                 <span className='hidden lg:flex font-semibold text-white dark:text-white'>Login</span>
                                             </div>
                                         </Tooltip>

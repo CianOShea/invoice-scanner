@@ -173,7 +173,6 @@ class Invoice extends Component {
           toaster.notify('No files detected')
           return
         }
-        
 
         const UID = Math.round( 1 + Math.random() * ( 1000000 - 1 ))
 
@@ -292,10 +291,13 @@ class Invoice extends Component {
               this.deleteS3(targetImage)
             }
 
+            return true
+
    
         } catch (error) {
           console.error(error)
           this.setState({ scanComplete: true, isScanning: false })
+          return false
         }
         
     }   
@@ -330,7 +332,7 @@ class Invoice extends Component {
           console.log("No such document!");
           return false
       }
-    }
+    }   
     
 
     async beginScan() {
@@ -347,12 +349,14 @@ class Invoice extends Component {
       for(var i=0; i < unscannedFiles.length; i++) {    
         var canScan = await this.getCurrentScanNumber() 
         if(canScan){
-          await this.getFiles(unscannedFiles[i], i)
-          scannedFiles.push(unscannedFiles[i])
-          unscannedFiles[i].scanned = true
-          this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
-          this.updateUserScanNumber()
-          this.updateSessionStorage()
+          const startScan = await this.getFiles(unscannedFiles[i], i)
+          if(startScan){
+            scannedFiles.push(unscannedFiles[i])
+            unscannedFiles[i].scanned = true
+            this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles })
+            this.updateUserScanNumber()
+            this.updateSessionStorage()
+          }          
         } else {
           console.log("Can't Scan");
           return
@@ -360,11 +364,12 @@ class Invoice extends Component {
         
       }
       console.log('Scan Complete');
-      unscannedFiles.filter(file => file.scanned === false)
+      const newUnscannedFiles = unscannedFiles.filter(file => file.scanned === false)
+      
       if(missingData.length > 0) {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles, cornerDialog: true })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: newUnscannedFiles, cornerDialog: true })
       } else {
-        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: unscannedFiles })
+        this.setState({ scanComplete: true, isScanning: false, unscannedFiles: newUnscannedFiles })
       }  
       
     }
@@ -752,7 +757,6 @@ class Invoice extends Component {
     render() { 
         const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
         
-        console.log(scannedFileData)
 
         if(pageLoaded){
           if(!isLoggedIn){
