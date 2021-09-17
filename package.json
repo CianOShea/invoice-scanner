@@ -67,9 +67,9 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
-    "appId": "com.cianoshea.invoice-scanner",
+    "appId": "com.invosync.*",
     "mac": {
-      "category": "com.cianoshea.invoice-scanner",
+      "category": "com.invosync.*",
       "target": [
         "dmg"
       ]

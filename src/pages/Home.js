@@ -1,10 +1,27 @@
 import React, { Component } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
+import firebase from '../firebase/firebase'
+const db = firebase.firestore();
 
 export class Home extends Component {
     onDashboard(){
         window.shell.openExternal('https://scanner-website.herokuapp.com/dashboard')
+    }
+
+    componentDidMount(){
+        const uploadsRef = db.collection('uploads')
+
+        // const unsubscribe = uploadsRef.onSnapshot(snapshot => {
+        //     let changes = snapshot.docChanges();
+        //     changes.forEach(change => {
+        //         if (change.type === 'modified') {
+        //             console.log('Update: ', change.doc.data());
+        //         }
+        //     })           
+        // })
+        
+        // return () => unsubscribe()
     }
     render() {
         console.log(this.props.history);

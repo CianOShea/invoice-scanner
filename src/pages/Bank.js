@@ -90,7 +90,7 @@ class Bank extends Component {
           sampleScannedFileData: [[{"value":"19762 "},{"value":"22/09/20 "},{"value":""},{"value":""},{"value":"€32.11 "},{"value":""}],[{"value":"000000 "},{"value":"10/07/14 "},{"value":""},{"value":"$4000.00 "},{"value":"$520.00 "},{"value":"4520.00"}],[{"value":""},{"value":""},{"value":""},{"value":152.88},{"value":"32.11 "},{"value":"184.99 "}],[{"value":""},{"value":"2/2/22 "},{"value":""},{"value":""},{"value":""},{"value":""}]]
       }
    }
-    componentDidMount(){
+    async componentDidMount(){
       window.ipcRenderer.on('test-back', this.handleRenderer)
 
       window.ipcRenderer.on('message', (event, text) => {
@@ -138,6 +138,19 @@ class Bank extends Component {
       if(sessionStorage.getItem('bankScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('bankScannedFiles')) } else { var scannedFiles = [] }
       if(sessionStorage.getItem('bankXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('bankXlsxData')) } else { var xlsxData = [] }      
       this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
+
+      const uploadsRef = db.collection('uploads')
+
+      const unsubscribe = uploadsRef.onSnapshot(snapshot => {
+        let changes = snapshot.docChanges();
+        changes.forEach(async change => {
+            if (change.type === 'modified') {
+                console.log(change.doc.data());
+            }
+        })           
+      })
+      
+      return () => unsubscribe()
     }
 
     handleRenderer(event, data) {
@@ -155,7 +168,7 @@ class Bank extends Component {
         this.setState({
             confirmation: 'Uploading...'
         })
-    }    
+    }  
 
     async getFiles(unscannedFiles, index){ 
 
