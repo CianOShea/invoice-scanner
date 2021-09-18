@@ -12,9 +12,9 @@ const msiCreator = new MSICreator({
     outputDirectory: OUT_DIR,
 
     // Configure Metadata 
-    description: 'Invoice Scanner application',
-    exe: 'Invoice Scanner Setup 0.1.5',
-    name: 'Invoice Scanner Desktop Application',
+    description: 'InvoSyncApplication',
+    exe: 'InvoSyncSetup0.1.5',
+    name: 'InvoSyncDesktopApplication',
     version: '0.1.5',
 
     // Configure installer user interface

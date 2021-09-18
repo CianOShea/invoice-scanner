@@ -79,7 +79,7 @@
         "nsis"
       ]
     },
-    "productName": "Invoice Scanner",
+    "productName": "InvoSync",
     "files": [
       "build/**/*",
       "node_modules/**/*",
