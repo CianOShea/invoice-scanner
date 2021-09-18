@@ -4,13 +4,14 @@ import Invoice from './pages/Invoice';
 import Bank from './pages/Bank';
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
-import { Route, Switch, Redirect  } from 'react-router-dom';
+import { Route, Switch, Redirect, HashRouter } from 'react-router-dom';
 
 import Sidebar from './components/Sidebar';
 
 export const Routes = () => {
 
   return (
+    <HashRouter>
     <div>
       {/* <Navbar /> */}
       {/* <Sidebar/> */}
@@ -24,5 +25,6 @@ export const Routes = () => {
         <Route exact path="/Login" component={Login} />
       </Switch>
     </div>
+    </HashRouter>
   );
 };
