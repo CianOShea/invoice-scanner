@@ -13,9 +13,9 @@ const msiCreator = new MSICreator({
 
     // Configure Metadata 
     description: 'InvoSyncApplication',
-    exe: 'InvoSyncSetup0.1.9',
+    exe: 'InvoSyncSetup0.2.0',
     name: 'InvoSyncDesktopApplication',
-    version: '0.1.9',
+    version: '0.2.0',
 
     // Configure installer user interface
     ui: {
