@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain, dialog } = electron;
 const { autoUpdater } = require("electron-updater")
 const isDev = require('electron-is-dev');
 const path = require('path');
+const url = require('url')
 const log = require('electron-log');
 
 
@@ -34,10 +35,19 @@ function createWindow() {
 
     // set the view for the window, by either going to localhost:3000
     // or if in production, grabbing the build file
+    // mainWindow.loadURL(
+    //     isDev
+    //         ? 'http://localhost:3000'
+    //         : `file://${path.join(__dirname, '../build/index.html')}`
+    // );
     mainWindow.loadURL(
         isDev
             ? 'http://localhost:3000'
-            : `file://${path.join(__dirname, '../build/index.html')}`
+            : url.format({
+              pathname: path.join(__dirname, '../build/index.html'),
+              protocol: 'file:',
+              slashes: true
+            });
     );
     
     // once the window is ready show it
