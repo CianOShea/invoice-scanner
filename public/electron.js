@@ -66,13 +66,13 @@ function createWindow() {
 
 }
 
-setInterval(() => {
-  autoUpdater.checkForUpdatesAndNotify();
-  console.log('checking');
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.send('version', app.getVersion())
-  })
-}, 60000)
+// setInterval(() => {
+//   autoUpdater.checkForUpdatesAndNotify();
+//   console.log('checking');
+//   mainWindow.webContents.on('did-finish-load', () => {
+//     mainWindow.webContents.send('version', app.getVersion())
+//   })
+// }, 60000)
 
 let splash
 
@@ -85,7 +85,7 @@ app.on('ready', () => {
   
   createWindow()
 
-  autoUpdater.checkForUpdatesAndNotify();
+  // autoUpdater.checkForUpdatesAndNotify();
 
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.webContents.send('version', app.getVersion())
