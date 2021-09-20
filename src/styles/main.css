@@ -1,0 +1,280 @@
+.sidebar {
+    display: flex; /* flex */
+    flex-direction: column; /* flex-col */
+    align-items: center; /* items-center */
+    width: 5rem; /* w-20 */
+    height: 100vh; /* h-screen */
+    padding-left: 0.5rem; /* px-2 */
+    padding-right: 0.5rem;
+    padding-top: 2rem; /* py-8 */
+    padding-bottom: 2rem;
+    --tw-bg-opacity: 1; /* bg-gray-800 */
+    background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+    border-right-width: 1px; /* border-r */
+    position: fixed; /* fixed */
+    z-index: 10; /* z-10 */
+}
+
+.homeLink{
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    justify-content: flex-start; /* justify-start */
+    text-decoration: none; /* no-underline */
+    --tw-text-opacity: 1; /* text-gray-900 */
+    color: rgba(31, 41, 55, var(--tw-text-opacity));    
+    font-weight: 500; /* font-medium */        
+}
+
+.sidebarLogo{
+    width: 2.5rem; /* w-10 */
+    height: 2.5rem; /* h-10 */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+    --tw-bg-opacity: 1; /* bg-indigo-500 */
+    background-color: rgba(99, 102, 241, var(--tw-bg-opacity)); 
+    border-radius: 9999px; /* rounded-full */
+    padding: 0.5rem; /* p-2 */
+}
+
+.sidebarTitleDiv{
+    display: none; /* hidden */
+    align-content: center; /* content-center */
+    margin: auto; /* m-auto */
+    align-items: center; /* items-center */
+    margin-top: 0.5rem; /* mt-2 */    
+}
+
+.sidebarTitle{
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 2rem;
+    font-weight: 600; /* font-semibold */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+}
+
+.sidebarContent{
+    display: flex; /* flex */
+    flex-direction: column; /* flex-col */
+    justify-content: space-between; /* justify-between */
+    flex: 1 1 0%; /* flex-1 */
+    margin-top: 1.5rem; /* mt-6 */
+}
+
+.sidebarItem{
+    display: flex; /* flex */
+    text-decoration: none; /* no-underline */
+    align-items: center; /* items-center */
+    padding-left: 0.5rem; /* px-2 */
+    padding-right: 0.5rem;
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem;
+    margin-top: 1.25rem; /* mt-5 */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+    border-radius: 0.5rem; /* rounded-lg */ 
+}
+
+.sidebarItem:hover{
+    --tw-bg-opacity: 1; /* bg-blue-600 */
+    background-color: rgba(37, 99, 235, var(--tw-bg-opacity));
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+}
+
+.sidebarItemTitle{
+    display: none; /* hidden */
+    font-size: 1.25rem; /* text-xl */
+    line-height: 1.75rem;
+    font-weight: 500; /* font-medium */
+}
+
+.sidebarButton{
+    display: flex; /* flex */
+    margin-left: auto; /* mx-auto */
+    margin-right: auto;
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+    --tw-bg-opacity: 1; /* bg-indigo-500 */
+    background-color: rgba(99, 102, 241, var(--tw-bg-opacity)); 
+    border-width: 0px; /* border-0 */
+    padding-left: 0.5rem; /* px-2 */
+    padding-right: 0.5rem;
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem;
+    border-radius: 9999px; /* rounded-full */
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.75rem;
+}
+.sidebarButton:hover{
+    --tw-bg-opacity: 1; /* bg-indigo-600 */
+    background-color: rgba(79, 70, 229, var(--tw-bg-opacity));
+}
+
+.sidebarButtonContent{
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    align-content: center; /* content-center */
+}
+.sidebarButtonLogo{
+    height: 1.5rem; /* h-6 */
+    width: 1.5rem; /* w-6 */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+}
+.sidebarButtonLogo:hover{
+    --tw-text-opacity: 1; /* text-indigo-600 */
+    color: rgba(79, 70, 229, var(--tw-text-opacity));
+}
+
+.sidebarButtonTitle{
+    display: none; /* hidden */
+    font-weight: 600; /* font-semibold */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+}
+
+.backgroundBlue600{
+    --tw-bg-opacity: 1; /* bg-blue-600 */
+    background-color: rgba(37, 99, 235, var(--tw-bg-opacity));
+}
+
+
+
+
+.mainPage{
+    display: grid; /* grid */
+    grid-template-columns: repeat(12, minmax(0, 1fr)); /* grid-cols-12 */
+}
+
+.sidebarImport{
+    grid-column: span 2 / span 2; /* col-span-2 */
+}
+
+.mainContent{
+    grid-column: span 10 / span 10; /* col-span-10 */
+}
+
+.homeDashboardButton{
+    display: flex; /* flex */
+    margin: auto; /* m-auto */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+    border-width: 0px; /* border-0 */
+    --tw-bg-opacity: 1; /* bg-green-500 */
+    background-color: rgba(16, 185, 129, var(--tw-bg-opacity));
+    padding-left: 2rem; /* px-8 */
+    padding-right: 2rem;
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem;
+    border-radius: 0.25rem; /* rounded */
+    font-size: 1.125rem; /* text-lg */
+}
+.homeDashboardButton:hover{
+    --tw-bg-opacity: 1; /* bg-green-600 */
+    background-color: rgba(5, 150, 105, var(--tw-bg-opacity));
+}
+
+.homeScanButton{
+    display: flex; /* flex */
+    --tw-text-opacity: 1; /* text-white */
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
+    --tw-bg-opacity: 1; /* bg-blue-600 */
+    background-color: rgba(37, 99, 235, var(--tw-bg-opacity));
+    border-width: 0px; /* border-0 */
+    padding-left: 2rem; /* px-8 */
+    padding-right: 2rem;
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem;
+    border-radius: 0.25rem; /* rounded */
+    font-size: 1.125rem; /* text-lg */
+}
+.homeScanButton:hover{
+    --tw-bg-opacity: 1; /* bg-blue-800 */
+    background-color: rgba(30, 64, 175, var(--tw-bg-opacity));
+}
+
+ 
+@media (min-width: 1024px) { /* lg */
+    .sidebar {
+        display: flex; /* flex */
+        flex-direction: column; /* flex-col */
+        align-items: flex-start; /* items-start */
+        width: 12rem; /* w-48 */
+        height: 100vh; /* h-screen */
+        padding-left: 1rem; /* px-4 */
+        padding-right: 1rem;
+        padding-top: 2rem; /* py-8 */
+        padding-bottom: 2rem;
+        --tw-bg-opacity: 1; /* bg-gray-800 */
+        background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+        border-right-width: 1px; /* border-r */
+        position: fixed; /* fixed */
+        z-index: 10; /* z-10 */
+    } 
+
+    .sidebarLogo{
+        width: 2.5rem; /* w-10 */
+        height: 2.5rem; /* h-10 */
+        --tw-text-opacity: 1; /* text-white */
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+        --tw-bg-opacity: 1; /* bg-indigo-500 */
+        background-color: rgba(99, 102, 241, var(--tw-bg-opacity)); 
+        border-radius: 9999px; /* rounded-full */
+        padding: 0.5rem; /* p-2 */
+        margin-right: 0.5rem; /* mr-2 */
+    }
+
+    .sidebarTitleDiv{
+        display: flex; /* flex */
+        align-content: center; /* content-center */
+        margin: auto; /* m-auto */
+        align-items: center; /* items-center */
+        margin-top: 0.5rem; /* mt-2 */
+    }
+
+    .sidebarItemTitle{
+        display: flex; /* hidden */
+        margin-left: 2rem; /* mx-8 */
+        margin-right: 2rem;
+        font-size: 1.25rem; /* text-xl */
+        line-height: 1.75rem;
+        font-weight: 500; /* font-medium */
+    }
+
+    .sidebarButton{
+        display: flex; /* flex */
+        margin-left: auto; /* mx-auto */
+        margin-right: auto;
+        --tw-text-opacity: 1; /* text-white */
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+        --tw-bg-opacity: 1; /* bg-indigo-500 */
+        background-color: rgba(99, 102, 241, var(--tw-bg-opacity)); 
+        border-width: 0px; /* border-0 */
+        padding-left: 1rem; /* px-4 */
+        padding-right: 1rem;
+        padding-top: 0.5rem; /* py-2 */
+        padding-bottom: 0.5rem;
+        border-radius: 0.25rem; /* rounded */
+        font-size: 1.125rem; /* text-lg */
+        line-height: 1.75rem;
+    }
+
+    .sidebarButtonLogo{
+        height: 1.5rem; /* h-6 */
+        width: 1.5rem; /* w-6 */
+        --tw-text-opacity: 1; /* text-white */
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+        margin-right: 0.5rem; /* mr-2 */
+    }
+
+    .sidebarButtonTitle{
+        display: flex; /* flex */
+        font-weight: 600; /* font-semibold */
+        --tw-text-opacity: 1; /* text-white */
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+    }
+
+    .sidebarLogimButton{
+        margin-left: 2rem; /* ml-8 */
+    }
+ }

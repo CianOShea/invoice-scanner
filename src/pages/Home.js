@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
+import { Heading, Paragraph, Pane } from 'evergreen-ui'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
 
@@ -26,37 +27,31 @@ export class Home extends Component {
     render() {
         console.log(this.props.history);
         return (
-            <div className='grid grid-cols-12 border-t-2'>
-                <div className="col-span-2">
+            <div className='mainPage'>
+                <div className="sidebarImport">
                   <Sidebar currentTab={'Home'}/>
                 </div>  
 
-                <div className="col-span-10"> 
-                    <section className="text-gray-600 body-font">
-                        <div className="container px-5 py-5 mt-10 mx-auto">
-                            <div className="flex flex-wrap w-full flex-col items-center text-center">
-                            <h1 className="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">Scanner App</h1>
-                            <p className="lg:w-1/2 w-full leading-relaxed text-gray-500">Easy to use Machine Learning Software. Automatically extract structured data from your documents.</p>
-                            </div>
-                        </div>
+                <div className="mainContent"> 
+                    <section>                        
+                        <Pane display='flex' flexDirection='column' marginBottom={50} textAlign='center'>
+                            <Heading size={900} marginBottom={20} marginTop={100}>InvoSync</Heading>
+                            <Paragraph size={900}>Easy to use Machine Learning Software.</Paragraph>
+                            <Paragraph size={900}>Automatically extract structured data from your documents.</Paragraph>
+                        </Pane>
                     </section>                  
-                    <button onClick={() => this.onDashboard()} className="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-green-600 rounded text-lg"><a>View Dashboard</a></button>
-                    
+                    <button onClick={() => this.onDashboard()} className="homeDashboardButton">View Dashboard</button>                    
 
-                    <div className="flex justify-between mt-20 mb-10 p-2">
-                        <div className="flex w-1/2 items-center justify-center mr-4">                            
-                            <div>
-                                <button onClick={() => this.props.history.push('/Invoice')} className="flex text-white bg-blue-600 border-0 py-2 px-8 focus:outline-none hover:bg-blue-800 rounded text-lg"><a>Scan Invoice</a></button>
-                            </div>
+                    <Pane display='flex' flexDirection='row' marginTop={60} marginBottom={10} padding={2} textAlign='center' justifyContent='space-evenly'>
+                       
+                        <div>
+                            <button onClick={() => this.props.history.push('/Invoice')} className="homeScanButton">Scan Invoice</button>
+                        </div>    
+                                                
+                        <div>
+                            <button onClick={() => this.props.history.push('/Bank')} className="homeScanButton">Scan Document</button>
                         </div>
-
-                        <div className="flex w-1/2 items-center justify-center">                            
-                            <div>
-                                <button onClick={() => this.props.history.push('/Bank')} className="flex text-white bg-blue-600 border-0 py-2 px-8 focus:outline-none hover:bg-blue-800 rounded text-lg"><a>Scan Document</a></button>
-                            </div>
-                        </div>                
-
-                    </div>
+                    </Pane>
                 </div>
             </div>
         )
