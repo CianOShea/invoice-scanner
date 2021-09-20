@@ -587,12 +587,12 @@ class Bank extends Component {
         }
 
         return ( 
-            <div className='grid grid-cols-12'>
-                <div className="col-span-2">
+            <div className='mainPage'>
+                <div className="sidebarImport">
                   <Sidebar currentTab={'Bank'} />
                 </div>  
 
-                <div className="col-span-10">      
+                <div className="mainContent">      
 
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
               
@@ -602,18 +602,17 @@ class Bank extends Component {
                       <Form onSubmit={this.handleSubmit}>
                         <FormGroup>                 
 
-                            <div className="flex text-sm text-gray-600 justify-center">
-                              <label
-                                htmlFor="file-upload"
-                                className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                              >
-                                <span>Upload a file</span>
+                            <Pane display='flex' justifyContent='center'>
+                              <label htmlFor="file-upload" >
+                                <span className='uploadLabel'>Upload a file</span>
                                 <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                               </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
+                              <Pane marginLeft={4}>
+                                <p>or drag and drop</p>
+                              </Pane>
+                            </Pane>
 
-                            <div ref= {this.myRef} className="files border-2 border-gray-300 border-dashed rounded-md -mt-14">
+                            <div ref= {this.myRef} className="files uploadContainer">
                                 <FileBase64                                     
                                     multiple={true}
                                     onDone={this.readFiles.bind(this)}
@@ -708,40 +707,37 @@ class Bank extends Component {
                         
                       </Pane>           
 
-                      <div className='w-full h-full'>
-                      <div className='overflow-auto p-2'>
-
-                      <ReactDataSheet
-                        data={this.state.header}
-                        valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
-                      />
-                      {
-                        xlsxData.length > 0 ?
-                          <ReactDataSheet
-                            data={this.state.xlsxData}
-                            valueRenderer={cell => cell.value}
-                            onCellsChanged={changes => {
-                              const xlsxData = this.state.xlsxData.map(row => [...row]);
-                              changes.forEach(({ cell, row, col, value }) => {
-                                xlsxData[row][col] = { ...xlsxData[row][col], value };
-                              });
-                              this.setState({ xlsxData }, () => this.updateSessionStorage());
-                            }}                        
-                          />
-                          :
-                          <ReactDataSheet
-                            data={this.state.grid}
-                            valueRenderer={cell => cell.value}
-                            onCellsChanged={changes => {
-                              const grid = this.state.grid.map(row => [...row]);
-                              changes.forEach(({ cell, row, col, value }) => {
-                                grid[row][col] = { ...grid[row][col], value };
-                              });
-                              this.setState({ grid });
-                            }}                        
-                          />
-                      }       
-                      </div>
+                      <div className='datasheetContainer'>
+                        <ReactDataSheet
+                          data={this.state.header}
+                          valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
+                        />
+                        {
+                          xlsxData.length > 0 ?
+                            <ReactDataSheet
+                              data={this.state.xlsxData}
+                              valueRenderer={cell => cell.value}
+                              onCellsChanged={changes => {
+                                const xlsxData = this.state.xlsxData.map(row => [...row]);
+                                changes.forEach(({ cell, row, col, value }) => {
+                                  xlsxData[row][col] = { ...xlsxData[row][col], value };
+                                });
+                                this.setState({ xlsxData }, () => this.updateSessionStorage());
+                              }}                        
+                            />
+                            :
+                            <ReactDataSheet
+                              data={this.state.grid}
+                              valueRenderer={cell => cell.value}
+                              onCellsChanged={changes => {
+                                const grid = this.state.grid.map(row => [...row]);
+                                changes.forEach(({ cell, row, col, value }) => {
+                                  grid[row][col] = { ...grid[row][col], value };
+                                });
+                                this.setState({ grid });
+                              }}                        
+                            />
+                        }      
                       </div>   
                     </Pane>                   
              

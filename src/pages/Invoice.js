@@ -769,13 +769,13 @@ class Invoice extends Component {
         return ( 
             <div>
 
-                <div className='grid grid-cols-12'>
+                <div className='mainPage'>
 
-                <div className="col-span-2">
-                  <Sidebar currentTab={'Invoice'}/>
-                </div>  
+                  <div className="sidebarImport">
+                    <Sidebar currentTab={'Invoice'}/>
+                  </div>  
 
-                <div className="col-span-10">    
+                <div className="mainContent">    
 
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
 
@@ -786,18 +786,17 @@ class Invoice extends Component {
                       <Form onSubmit={this.handleSubmit}>
                         <FormGroup>                 
 
-                            <div className="flex text-sm text-gray-600 justify-center">
-                              <label
-                                htmlFor="file-upload"
-                                className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                              >
-                                <span>Upload a file</span>
+                            <Pane display='flex' justifyContent='center'>
+                              <label htmlFor="file-upload" >
+                                <span className='uploadLabel'>Upload a file</span>
                                 <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                               </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
+                              <Pane marginLeft={4}>
+                                <p>or drag and drop</p>
+                              </Pane>
+                            </Pane>
 
-                            <div ref= {this.myRef} className="files border-2 border-gray-300 border-dashed rounded-md -mt-14">
+                            <div ref= {this.myRef} className="files uploadContainer">
                                 <FileBase64                                     
                                     multiple={true}
                                     onDone={this.readFiles.bind(this)}
@@ -897,47 +896,44 @@ class Invoice extends Component {
 
                       </div>         
 
-                      <div className='w-full h-full'>
-                      <div className='overflow-auto p-2'>
-                      <ReactDataSheet
-                        data={this.state.header}
-                        valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
-                      />
-                      {
-                        scannedFileData.length > 0 ?
+                      <div className='datasheetContainer'>
                           <ReactDataSheet
-                            data={this.state.scannedFileData}
-                            valueRenderer={cell => cell.value}
-                            onCellsChanged={changes => {
-                              const scannedFileData = this.state.scannedFileData.map(row => [...row]);
-                              changes.forEach(({ cell, row, col, value }) => {
-                                scannedFileData[row][col] = { ...scannedFileData[row][col], value };
-                              });
-                              this.setState({ scannedFileData }, () => this.updateSessionStorage()); 
-                            }}                        
+                            data={this.state.header}
+                            valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
                           />
-                          :
-                          <ReactDataSheet
-                            data={this.state.grid}
-                            valueRenderer={cell => cell.value}
-                            onCellsChanged={changes => {
-                              const grid = this.state.grid.map(row => [...row]);
-                              changes.forEach(({ cell, row, col, value }) => {
-                                grid[row][col] = { ...grid[row][col], value };
-                              });
-                              this.setState({ grid });
-                            }}                        
-                          />
-                      }     
-
-                      </div>
+                          {
+                            scannedFileData.length > 0 ?
+                              <ReactDataSheet
+                                data={this.state.scannedFileData}
+                                valueRenderer={cell => cell.value}
+                                onCellsChanged={changes => {
+                                  const scannedFileData = this.state.scannedFileData.map(row => [...row]);
+                                  changes.forEach(({ cell, row, col, value }) => {
+                                    scannedFileData[row][col] = { ...scannedFileData[row][col], value };
+                                  });
+                                  this.setState({ scannedFileData }, () => this.updateSessionStorage()); 
+                                }}                        
+                              />
+                              :
+                              <ReactDataSheet
+                                data={this.state.grid}
+                                valueRenderer={cell => cell.value}
+                                onCellsChanged={changes => {
+                                  const grid = this.state.grid.map(row => [...row]);
+                                  changes.forEach(({ cell, row, col, value }) => {
+                                    grid[row][col] = { ...grid[row][col], value };
+                                  });
+                                  this.setState({ grid });
+                                }}                        
+                              />
+                          }     
                       </div>   
 
 
                     </Pane>
                     
                     {
-                      !isScanning && missingData.length > 0 &&
+                      // !isScanning && missingData.length > 0 &&
                     
 
                     <Dialog
@@ -949,21 +945,21 @@ class Invoice extends Component {
                       preventBodyScrolling
                       width='900px'
                     > 
-                      <div className='flex text-center'> 
+                      <Pane display='flex' textAlign='center'> 
                         <Heading margin='auto' padding={20} justifyContent='center' size={900}>Missing Data</Heading>
-                      </div>
+                      </Pane>
                       {
                         missingData.map(((data,index) => ( 
                             <Pane marginBottom={20} paddingBottom={20} key={index} data={data} borderBottom>
-                              <div className='flex pb-3'>
+                              <Pane display='flex' marginBottom={10}>
                                 <Heading size={600}>{data.fileName.toUpperCase()}</Heading>
-                              </div>
+                              </Pane>
                               {
                                 data.InvoiceNumber &&
                                 <Fragment>                                                                         
                                   <Heading size={500}>Invoice Number:</Heading>
-                                  <div className='flex flex-wrap justify-center'>   
-                                    <div className='p-4 pt-1'>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
                                       <SelectMenu
                                         width={300}
                                         title="Invoice Number"
@@ -982,7 +978,7 @@ class Invoice extends Component {
                                         <Button width={300}>{'Select Invoice Number...'}</Button>
                                       </SelectMenu> 
                                     </div>
-                                    <div className='p-4 pt-1'>                          
+                                    <div className='missingDataContent'>                          
                                       <TextInput width={300} name="text-input-name" placeholder="Invoice Number" value={scannedFileData[data.scannedFileIndex][0].value} onChange={e => {scannedFileData[data.scannedFileIndex][0].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}} />                                        
                                     </div> 
                                   </div>                                  
@@ -992,8 +988,8 @@ class Invoice extends Component {
                                 data.Date &&
                                 <Fragment>
                                 <Heading size={500}>Invoice Date:</Heading>
-                                  <div className='flex flex-wrap justify-center'>   
-                                    <div className='p-4 pt-1'>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
                                       <SelectMenu
                                         width={300}
                                         title="Invoice Date"
@@ -1012,7 +1008,7 @@ class Invoice extends Component {
                                         <Button width={300}>{'Select Invoice Date...'}</Button>
                                       </SelectMenu>    
                                     </div> 
-                                    <div className='p-4 pt-1'>                           
+                                    <div className='missingDataContent'>                           
                                       <TextInput width={300} name="text-input-name" placeholder="Date" value={scannedFileData[data.scannedFileIndex][1].value} onChange={e => {scannedFileData[data.scannedFileIndex][1].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                     </div> 
                                   </div>                                       
@@ -1022,8 +1018,8 @@ class Invoice extends Component {
                                 data.Subtotal &&
                                 <Fragment>
                                   <Heading size={500}>Subtotal:</Heading>
-                                  <div className='flex flex-wrap justify-center'>   
-                                    <div className='p-4 pt-1'>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
                                       <SelectMenu
                                         width={300}
                                         title="Subtotal"
@@ -1042,7 +1038,7 @@ class Invoice extends Component {
                                         <Button width={300}>{'Select Subtotal...'}</Button>
                                       </SelectMenu> 
                                     </div> 
-                                    <div className='p-4 pt-1'>                            
+                                    <div className='missingDataContent'>                            
                                       <TextInput width={300} name="text-input-name" placeholder="Subtotal" value={scannedFileData[data.scannedFileIndex][3].value} onChange={e => {scannedFileData[data.scannedFileIndex][3].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}} />
                                     </div> 
                                   </div>  
@@ -1052,8 +1048,8 @@ class Invoice extends Component {
                                 data.VAT &&
                                 <Fragment>
                                 <Heading size={500}>VAT:</Heading>
-                                  <div className='flex flex-wrap justify-center'>   
-                                    <div className='p-4 pt-1'>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
                                       <SelectMenu
                                         width={300}
                                         title="VAT"
@@ -1072,7 +1068,7 @@ class Invoice extends Component {
                                         <Button width={300}>{'Select VAT...'}</Button>
                                       </SelectMenu> 
                                     </div> 
-                                    <div className='p-4 pt-1'>                        
+                                    <div className='missingDataContent'>                        
                                       <TextInput width={300} name="text-input-name" placeholder="VAT" value={scannedFileData[data.scannedFileIndex][4].value} onChange={e => {scannedFileData[data.scannedFileIndex][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                     </div> 
                                   </div>                                     
@@ -1082,8 +1078,8 @@ class Invoice extends Component {
                                 data.Total &&
                                 <Fragment>
                                 <Heading size={500}>Total:</Heading>
-                                  <div className='flex flex-wrap justify-center'>   
-                                    <div className='p-4 pt-1'>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
                                       <SelectMenu
                                         width={300}
                                         title="Total"
@@ -1102,7 +1098,7 @@ class Invoice extends Component {
                                         <Button width={300}>{'Select Total...'}</Button>
                                       </SelectMenu> 
                                     </div> 
-                                    <div className='p-4 pt-1'>                        
+                                    <div className='missingDataContent'>                        
                                       <TextInput width={300} name="text-input-name" placeholder="Total" value={scannedFileData[data.scannedFileIndex][5].value} onChange={e => {scannedFileData[data.scannedFileIndex][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                     </div> 
                                   </div>                                    
