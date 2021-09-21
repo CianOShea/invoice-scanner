@@ -49,7 +49,7 @@ export class Home extends Component {
                         </div>    
                                                 
                         <div>
-                            <button onClick={() => this.props.history.push('/Bank')} className="homeScanButton">Scan Document</button>
+                            <button onClick={() => this.props.history.push('/Statement')} className="homeScanButton">Scan Document</button>
                         </div>
                     </Pane>
                 </div>

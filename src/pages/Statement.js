@@ -3,7 +3,6 @@
 /* eslint-disable no-unused-vars */
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
-import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
@@ -39,7 +38,7 @@ AWS.config.update({
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
 
-class Bank extends Component {
+class Statement extends Component {
 
    constructor(props) {
       super(props);
@@ -135,8 +134,8 @@ class Bank extends Component {
         }
       });
 
-      if(sessionStorage.getItem('bankScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('bankScannedFiles')) } else { var scannedFiles = [] }
-      if(sessionStorage.getItem('bankXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('bankXlsxData')) } else { var xlsxData = [] }      
+      if(sessionStorage.getItem('statementScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('statementScannedFiles')) } else { var scannedFiles = [] }
+      if(sessionStorage.getItem('statementXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('statementXlsxData')) } else { var xlsxData = [] }      
       this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
 
       const uploadsRef = db.collection('uploads')
@@ -554,8 +553,8 @@ class Bank extends Component {
     refresh(){
         this.myRef.current.children[0].value = null
         this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
-        sessionStorage.setItem('bankScannedFiles', [])
-        sessionStorage.setItem('bankXlsxData', [])
+        sessionStorage.setItem('statementScannedFiles', [])
+        sessionStorage.setItem('statementXlsxData', [])
     }
 
     deleteS3(targetImage){
@@ -571,8 +570,8 @@ class Bank extends Component {
     updateSessionStorage(){
       const { scannedFiles, scannedFileData, missingData, xlsxData } = this.state
 
-      sessionStorage.setItem('bankScannedFiles', JSON.stringify(scannedFiles))
-      sessionStorage.setItem('bankXlsxData', JSON.stringify(xlsxData))
+      sessionStorage.setItem('statementScannedFiles', JSON.stringify(scannedFiles))
+      sessionStorage.setItem('statementXlsxData', JSON.stringify(xlsxData))
     }
     
     render() { 
@@ -589,7 +588,7 @@ class Bank extends Component {
         return ( 
             <div className='mainPage'>
                 <div className="sidebarImport">
-                  <Sidebar currentTab={'Bank'} />
+                  <Sidebar currentTab={'Statement'} />
                 </div>  
 
                 <div className="mainContent">      
@@ -597,7 +596,7 @@ class Bank extends Component {
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
               
 
-                      <Heading size={900} marginBottom={50}>Bank Scanner</Heading>
+                      <Heading size={900} marginBottom={50}>Statement Scanner</Heading>
 
                       <Form onSubmit={this.handleSubmit}>
                         <FormGroup>                 
@@ -747,4 +746,4 @@ class Bank extends Component {
     }
 }
  
-export default Bank;
+export default Statement;

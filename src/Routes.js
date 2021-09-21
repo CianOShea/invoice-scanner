@@ -1,7 +1,7 @@
 import React from 'react';
 import Home from './pages/Home';
 import Invoice from './pages/Invoice';
-import Bank from './pages/Bank';
+import Statement from './pages/Statement';
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
 import { Route, Switch, Redirect, HashRouter } from 'react-router-dom';
@@ -21,7 +21,7 @@ export const Routes = () => {
             <Redirect to="/Home" />
         </Route>
         <Route exact path="/Invoice" component={Invoice} />        
-        <Route exact path="/Bank" component={Bank} />
+        <Route exact path="/Statement" component={Statement} />
         <Route exact path="/Login" component={Login} />
       </Switch>
     </div>

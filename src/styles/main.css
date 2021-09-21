@@ -58,6 +58,7 @@
     justify-content: space-between; /* justify-between */
     flex: 1 1 0%; /* flex-1 */
     margin-top: 1.5rem; /* mt-6 */
+    max-width: 100%;
 }
 
 .sidebarItem{
@@ -86,6 +87,8 @@
     font-size: 1.25rem; /* text-xl */
     line-height: 1.75rem;
     font-weight: 500; /* font-medium */
+    margin-left: 1rem;
+    margin-right: 2rem;
 }
 
 .sidebarButton{

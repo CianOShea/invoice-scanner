@@ -62,10 +62,10 @@ function Sidebar(props) {
                                 <span className="sidebarItemTitle">Invoice</span>
                             </Link>      
                         </Tooltip>                  
-                        <Tooltip content="Bank" position={Position.RIGHT}>
-                            <Link className={`sidebarItem ${props.currentTab === 'Bank' && "backgroundBlue600"}`} to="/Bank">                                    
+                        <Tooltip content="Statement" position={Position.RIGHT}>
+                            <Link className={`sidebarItem ${props.currentTab === 'Statement' && "backgroundBlue600"}`} to="/Statement">                                    
                                 <FontAwesomeIcon icon={faWallet} />
-                                <span className="sidebarItemTitle">Bank</span>
+                                <span className="sidebarItemTitle">Statement</span>
                             </Link>   
                         </Tooltip>
                     </Fragment>
