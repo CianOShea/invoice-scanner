@@ -70,19 +70,21 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
-    "appId": "com.invosync.*",
+    "productName": "InvoSync",
+    "appId": "com.invosync.invosync",
     "mac": {
-      "category": "com.invosync.*",
       "target": [
-        "dmg"
+        "mas"
       ]
     },
+    "provisioningProfile": "embedded.provisionprofile",
+    "entitlements": "entitlements.mas.plist",
+    "type": "distribution",
     "win": {
       "target": [
         "nsis"
       ]
-    },
-    "productName": "InvoSync",
+    },    
     "files": [
       "build/**/*",
       "node_modules/**/*",

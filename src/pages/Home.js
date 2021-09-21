@@ -52,13 +52,6 @@ export class Home extends Component {
                             <button onClick={() => this.props.history.push('/Statement')} className="homeScanButton">Scan Document</button>
                         </div>
                     </Pane>
-
-                    <div>
-                        <div className="flex flex-wrap w-full flex-col items-center text-center bg-green-400">
-                            <h1 className="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">Tailwind Test</h1>
-                            <p className="lg:w-1/2 w-full leading-relaxed text-gray-500">Easy to use Machine Learning Software. Automatically extract structured data from your documents.</p>                  
-                        </div>
-                    </div>
                 </div>
             </div>
         )
