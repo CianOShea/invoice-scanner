@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-vars */
 import React, { Component, Fragment } from 'react';
 import { Redirect } from 'react-router-dom';
+import Cookie from 'js-cookie'
 import Sidebar from '../components/Sidebar'
 import FileBase64 from 'react-file-base64';
 import { Form, FormGroup, FormText } from "reactstrap";
@@ -51,6 +52,8 @@ class Statement extends Component {
           redirect: null,
           paymentID: '',
           scansExceeded: false,
+          mobileScanDialog: false,
+          mobileScanData: [],
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -138,13 +141,15 @@ class Statement extends Component {
       if(sessionStorage.getItem('statementXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('statementXlsxData')) } else { var xlsxData = [] }      
       this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
 
-      const uploadsRef = db.collection('uploads')
+      const userID = Cookie.get('token')
+      const uploadsRef = db.collection('mobileScans').doc(userID).collection('statementsScans')
 
       const unsubscribe = uploadsRef.onSnapshot(snapshot => {
         let changes = snapshot.docChanges();
         changes.forEach(async change => {
             if (change.type === 'modified') {
                 console.log(change.doc.data());
+                this.setState({ mobileScanDialog: true, mobileScanData: change.doc.data() })
             }
         })           
       })
@@ -483,6 +488,83 @@ class Statement extends Component {
       console.log(xlsxData);
     }
 
+    acceptIncomingData(data){
+      const { scannedFileData } = this.state
+
+      console.log('Accept');
+      console.log(data);
+
+      let lambdaData = data.data
+      console.log(lambdaData);       
+
+      if (lambdaData.tables) {
+        const TABLESmap = Object.values(lambdaData.tables);
+        // console.log(TABLESmap);
+
+        var datasheetTABLES = []
+
+        for (var k = 0; k < TABLESmap.length; k++) {
+          const splitNLData = TABLESmap[k].split(/\r\n|\r|\n/)
+          var gridData = []
+
+          for (var i = 0; i < splitNLData.length; i++) {
+              var splitCommaData = splitNLData[i].split(',')
+              var row = []
+              for (var j = 0; j < splitCommaData.length; j++) {
+                var item = {};
+                item.value = splitCommaData[j];
+                row.push(item);              
+              }           
+              gridData.push(row)
+          }
+          // console.log(gridData)
+          datasheetTABLES.push(gridData)
+        }
+        // console.log(datasheetTABLES);
+        this.setState({ sampleData: datasheetTABLES })
+      }            
+
+      if (lambdaData.kv && lambdaData.key_map) {            
+
+        const FD = lambdaData.kv
+        const KM = lambdaData.key_map
+
+        const FDmap = Object.entries(FD)
+        const KMmap = Object.entries(KM)
+
+        var sortedForm = []
+        
+        FDmap.map(FDdata => {
+            KMmap.map(KMdata => {
+                if(FDdata[0] === KMdata[0]){
+                    sortedForm.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
+                }
+            })
+        })   
+
+        sortedForm.sort(function(a, b) {
+            return a.Top - b.Top;
+        });
+        console.log(sortedForm)
+        // console.log(JSON.stringify(sortedForm))
+        
+        var form = []
+        sortedForm.map( SF => {             
+          var arr = [{value: SF.Key}, {value: SF.Value}]
+          form.push(arr)
+        })
+
+        this.setState({ formData: lambdaData.kv, keyMap: lambdaData.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData, mobileScanDialog: false }, () => this.prepareAllCSV())
+      }
+      
+      // this.prepareAllCSV()
+      // this.deleteS3(targetImage)       
+    }
+
+    declineIncomingData(){
+      console.log('Decline');
+    }
+
 
     async readFiles(files){
       if(!files){
@@ -575,7 +657,7 @@ class Statement extends Component {
     }
     
     render() { 
-        const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+        const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
 
         if(pageLoaded){
           if(!isLoggedIn){
@@ -590,6 +672,19 @@ class Statement extends Component {
                 <div className="sidebarImport">
                   <Sidebar currentTab={'Statement'} />
                 </div>  
+
+                <Dialog
+                  isShown={mobileScanDialog}
+                  title="Incoming Mobile Scan"
+                  onCloseComplete={() => this.setState({ mobileScanDialog: false })}
+                  hasFooter={false}
+                  preventBodyScrolling
+                >
+                  <Pane display='flex' justifyContent='space-between' padding={50}>
+                    <Button onClick={() => this.acceptIncomingData(mobileScanData)} appearance="primary">Accept Incoming Data</Button>
+                    <Button onClick={() => this.declineIncomingData()} appearance="primary" intent='danger'>Decline Incoming Data</Button>
+                  </Pane>
+                </Dialog>
 
                 <div className="mainContent">      
 

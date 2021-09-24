@@ -73,13 +73,14 @@
     "productName": "InvoSync",
     "appId": "com.invosync.invosync",
     "mac": {
+      "icon": "resources/icon.icns",
       "target": [
         "mas"
-      ]
-    },
-    "provisioningProfile": "embedded.provisionprofile",
-    "entitlements": "entitlements.mas.plist",
-    "type": "distribution",
+      ],
+      "provisioningProfile": "embedded.provisionprofile",
+      "entitlements": "entitlements.mas.plist",
+      "type": "distribution"
+    },    
     "win": {
       "target": [
         "nsis"
