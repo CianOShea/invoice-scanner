@@ -121,6 +121,7 @@ class Statement extends Component {
         if (user) {
           db.collection("users").doc(user.uid).get().then((doc) => {
               if (doc.exists) {
+                  Cookie.set('token', user.uid)
                   this.setState({ userToken: user.uid, paymentID: doc.data().paymentID, isLoggedIn: true, pageLoaded: true })               
               } else {
                   // doc.data() will be undefined in this case
@@ -489,6 +490,11 @@ class Statement extends Component {
     }
 
     acceptIncomingData(data){
+      // Put incoming parsed mobile data into seperate array. Check if desktop app is scanning. 
+      // If scanning keep data in array until scan is complete and combine array afterwards.
+      // If not scanning, immediately add new array to datasheet.
+      // If another mobile scan comes in before decision to accept/deny then previous scan is erased.
+
       const { scannedFileData } = this.state
 
       console.log('Accept');
@@ -558,11 +564,13 @@ class Statement extends Component {
       }
       
       // this.prepareAllCSV()
-      // this.deleteS3(targetImage)       
+      this.deleteS3(data.fileName)       
     }
 
-    declineIncomingData(){
+    declineIncomingData(data){
+      this.deleteS3(data.fileName)
       console.log('Decline');
+      this.setState({ mobileScanDialog: false })
     }
 
 
@@ -682,7 +690,7 @@ class Statement extends Component {
                 >
                   <Pane display='flex' justifyContent='space-between' padding={50}>
                     <Button onClick={() => this.acceptIncomingData(mobileScanData)} appearance="primary">Accept Incoming Data</Button>
-                    <Button onClick={() => this.declineIncomingData()} appearance="primary" intent='danger'>Decline Incoming Data</Button>
+                    <Button onClick={() => this.declineIncomingData(mobileScanData)} appearance="primary" intent='danger'>Decline Incoming Data</Button>
                   </Pane>
                 </Dialog>
 
