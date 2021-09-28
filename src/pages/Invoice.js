@@ -55,6 +55,8 @@ class Invoice extends Component {
           redirect: null,
           paymentID: '',
           scansExceeded: false,
+          mobileScanDialog: false,
+          mobileScanData: [],
           appVersion: '-',
           messages: '--',
           progressBar: '---',
@@ -66,9 +68,9 @@ class Invoice extends Component {
           csv: [],
           keyMap: '',
           formData: '',
-          sampleData: [],
+          tableData: [],
           imageDataURL: null,
-          sortedForm: {},
+          sortedFormData: {},
           header: [
             [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
           ],
@@ -82,7 +84,6 @@ class Invoice extends Component {
           ],
           missingDataDialog: false,
           cornerDialog: false,
-          form: [],
           array: [],
           xlsxData: [],
           scanComplete: false,
@@ -96,29 +97,6 @@ class Invoice extends Component {
    }
 
     componentDidMount(){
-      window.ipcRenderer.on('test-back', this.handleRenderer)
-
-      window.ipcRenderer.on('message', (event, text) => {
-
-        let message = document.createElement('div')
-        // message.innerHTML = text
-        // container.appendChild(message)
-        console.log(`Message: ${text}`);
-        this.setState({ messages: text })
-
-      })
-
-      window.ipcRenderer.on('version', (event, text) => {
-        // version.innerText = text
-        console.log(`Version: ${text}`);
-        this.setState({ appVersion: text})
-      })
-
-      window.ipcRenderer.on('download-progress', (event, text) => {
-        // progressBar.style.width = `${text}%`
-        console.log(`progressBar: ${text}`);
-        this.setState({ progressBar: text})
-      })
      
       firebase.auth().onAuthStateChanged(user => {
         if (user) {
@@ -145,17 +123,22 @@ class Invoice extends Component {
       if(sessionStorage.getItem('invoiceMissingData')) { var missingData = JSON.parse(sessionStorage.getItem('invoiceMissingData')) } else { var missingData = [] }
       if(sessionStorage.getItem('invoiceXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('invoiceXlsxData')) } else { var xlsxData = [] }
       this.setState({ scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
-    }
 
-    handleRenderer(event, data) {
-      console.log(data);
-    }
+      const userID = Cookie.get('token')
+      const uploadsRef = db.collection('mobileScans').doc(userID).collection('invoiceScans')
 
-    handleChange(e){
-        e.preventDefault();
-        this.setState({ [e.target.name]: e.target.value })
+      const unsubscribe = uploadsRef.onSnapshot(snapshot => {
+        let changes = snapshot.docChanges();
+        changes.forEach(async change => {
+            if (change.type === 'modified') {
+                console.log(change.doc.data());
+                this.setState({ mobileScanDialog: true, mobileScanData: change.doc.data() })
+            }
+        })           
+      })
+      
+      return () => unsubscribe()
     }
-
 
     async handleSubmit(e){
         e.preventDefault();
@@ -164,9 +147,7 @@ class Invoice extends Component {
         })
     }    
 
-    async getFiles(unscannedFiles, index){ 
-
-        const { scannedFileData, grid } = this.state          
+    async getFiles(unscannedFiles, index){                  
         
         if(unscannedFiles.length < 1){
           console.log('No files detected');
@@ -183,6 +164,7 @@ class Invoice extends Component {
             img: unscannedFiles.base64,
             fileType: unscannedFiles.fileType
         }
+        const targetImage = `${data.imageID}.${data.fileExt}`
         
         try {
           
@@ -195,9 +177,7 @@ class Invoice extends Component {
                   },
                   body: JSON.stringify(data)
               }
-          )
-
-          const targetImage = data.imageID + '.' + data.fileExt;  
+          )          
 
           var pullParams = {
             FunctionName : 'OCR',
@@ -206,8 +186,7 @@ class Invoice extends Component {
             Payload: JSON.stringify(targetImage)
           };
           
-          // create variable to hold data returned by that Lambda function
-          var pullResults;
+          // create variable to hold data returned by that Lambda function          
 
           const lambdaPromise = await new Promise((resolve, reject) => lambda.invoke({
             Payload: JSON.stringify(targetImage),
@@ -216,84 +195,12 @@ class Invoice extends Component {
             (result.FunctionError) ? reject({ statusCode: 502, body: result.Payload })
             : resolve(result))))
             
-          const lambdaData = JSON.parse(lambdaPromise.Payload)
+          const lambdaData = JSON.parse(lambdaPromise.Payload)         
 
-         
+          if(lambdaData.body){  this.prepareIncomingData(lambdaData.body, index, targetImage) }
 
-          if(lambdaData.body){            
+          return true
 
-              if (lambdaData.body.tables) {
-                const TABLESmap = Object.values(lambdaData.body.tables);
-                // console.log(TABLESmap);
-
-                var datasheetTABLES = []
-
-                for (var k = 0; k < TABLESmap.length; k++) {
-                  const splitNLData = TABLESmap[k].split(/\r\n|\r|\n/)
-                  var gridData = []
-
-                  for (var i = 0; i < splitNLData.length; i++) {
-                      var splitCommaData = splitNLData[i].split(',')
-                      var row = []
-                      for (var j = 0; j < splitCommaData.length; j++) {
-                        var item = {};
-                        item.value = splitCommaData[j];
-                        row.push(item);              
-                      }           
-                      gridData.push(row)
-                  }
-                  // console.log(gridData)
-                  datasheetTABLES.push(gridData)
-                }
-                // console.log(datasheetTABLES);
-                this.setState({ sampleData: datasheetTABLES })
-              }            
-
-              if (lambdaData.body.kv && lambdaData.body.key_map) {            
-
-                const FD = lambdaData.body.kv
-                const KM = lambdaData.body.key_map
-
-                const FDmap = Object.entries(FD)
-                const KMmap = Object.entries(KM)
-
-                var sortedForm = []
-                
-                FDmap.map(FDdata => {
-                    KMmap.map(KMdata => {
-                        if(FDdata[0] == KMdata[0]){
-                            sortedForm.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
-                        }
-                    })
-                })   
-
-                sortedForm.sort(function(a, b) {
-                    return a.Top - b.Top;
-                });
-                // console.log(sortedForm)
-                // console.log(JSON.stringify(sortedForm))
-                
-                var form = []
-                sortedForm.map( SF => {             
-                  var arr = [{value: SF.Key}, {value: SF.Value}]
-                  form.push(arr)
-                })
-
-                const invoiceDate = this.findInvoiceDate(sortedForm, index)
-                const invoiceNumber = this.findInvoiceNumber(sortedForm, index)
-                const invoiceTotal = this.findInvoiceTotal(sortedForm, index)
-                
-                scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.VAT.Value }, { value: invoiceTotal.TOTAL.Value }])                
-              
-                this.setState({ formData: lambdaData.body.kv, keyMap: lambdaData.body.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData })
-              }
-              this.prepareAllCSV()              
-              this.deleteS3(targetImage)
-            }
-
-            return true
-
-   
         } catch (error) {
           console.error(error)
           this.setState({ scanComplete: true, isScanning: false })
@@ -301,6 +208,72 @@ class Invoice extends Component {
         }
         
     }   
+
+    prepareIncomingData(lambdaData, index, targetImage){
+
+      const { scannedFileData } = this.state 
+      
+      if (lambdaData.tables) {
+        const lambdaTableData = Object.values(lambdaData.tables); 
+        console.log(lambdaTableData);
+
+        var newTableData = []
+
+        for (var k = 0; k < lambdaTableData.length; k++) {
+          const splitTableData = lambdaTableData[k].split(/\r\n|\r|\n/)
+          var gridData = []
+
+          for (var i = 0; i < splitTableData.length; i++) {
+              var csvTableData = splitTableData[i].split(',')
+              var row = []
+              for (var j = 0; j < csvTableData.length; j++) {
+                var item = {};
+                item.value = csvTableData[j];
+                row.push(item);              
+              }           
+              gridData.push(row)
+          }
+          newTableData.push(gridData)
+        }
+        this.setState({ tableData: newTableData })
+      }            
+
+      if (lambdaData.kv && lambdaData.key_map) {    
+
+        const lambdaFormData = Object.entries(lambdaData.kv)
+        const lambdaKeyMap = Object.entries(lambdaData.key_map)
+
+        var sortedFormData = []
+        
+        lambdaFormData.map(FDdata => {
+            lambdaKeyMap.map(KMdata => {
+                if(FDdata[0] == KMdata[0]){
+                    sortedFormData.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
+                }
+            })
+        })   
+
+        sortedFormData.sort(function(a, b) {
+            return a.Top - b.Top;
+        });
+        
+        var newFormData = []
+        sortedFormData.map( SF => {             
+          var arr = [{value: SF.Key}, {value: SF.Value}]
+          newFormData.push(arr)
+        })
+
+        const invoiceDate = this.findInvoiceDate(sortedFormData, index)
+        const invoiceNumber = this.findInvoiceNumber(sortedFormData, index)
+        const invoiceTotal = this.findInvoiceTotal(sortedFormData, index)
+        
+        scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.VAT.Value }, { value: invoiceTotal.TOTAL.Value }])                
+      
+        this.setState({ sortedFormData: sortedFormData, formData: newFormData, scannedFileData: scannedFileData })
+      }
+      this.prepareAllCSV(newTableData, newFormData)           
+      this.deleteS3(targetImage)
+    }
 
     async getCurrentScanNumber(){
       const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
@@ -332,8 +305,7 @@ class Invoice extends Component {
           console.log("No such document!");
           return false
       }
-    }   
-    
+    }       
 
     async beginScan() {
       const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
@@ -421,13 +393,12 @@ class Invoice extends Component {
     }
 
     prepareAllCSV() {
-      const { sampleData, form, xlsxData } = this.state
-    
+      const { tableData, formData, xlsxData } = this.state    
 
-      for(var i=0; i < sampleData.length; i++){ 
+      for(var i=0; i < tableData.length; i++){ 
 
-          for(var j=0; j < sampleData[i].length; j++){          
-          var arr = sampleData[i][j].map(row => {
+          for(var j=0; j < tableData[i].length; j++){          
+          var arr = tableData[i][j].map(row => {
               var value = Object.values(row)
               return value
           })
@@ -436,8 +407,8 @@ class Invoice extends Component {
           }   
       } 
 
-      for(var i=0; i < form.length; i++){          
-          var arr = form[i].map(row => {
+      for(var i=0; i < formData.length; i++){          
+          var arr = formData[i].map(row => {
           var value = Object.values(row)
           return value
           })
@@ -446,8 +417,23 @@ class Invoice extends Component {
       }       
       
       this.setState({ xlsxData: xlsxData })
-      // console.log(xlsxData);
     }
+
+    acceptIncomingData(lambdaData){      
+      const { scannedFiles } = this.state
+      const index = scannedFiles.length
+
+      if(lambdaData){  this.prepareIncomingData(lambdaData.data, index, lambdaData.fileName) }   
+
+      this.setState({ mobileScanDialog: false })
+      
+    }
+
+    declineIncomingData(data){
+      console.log('Decline');
+      this.setState({ mobileScanDialog: false })
+    }
+    
 
     async readFiles(files){
       if(!files){
@@ -520,12 +506,12 @@ class Invoice extends Component {
       this.setState({ missingData: missingData });
     }
 
-    findInvoiceDate(sortedForm, index){
+    findInvoiceDate(sortedFormData, index){
       const { unscannedFiles, missingData } = this.state
 
-      // console.log(sortedForm);
+      // console.log(sortedFormData);
       // console.log(index);
-      var dateSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))     
+      var dateSearch = sortedFormData.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))     
 
       if (dateSearch.length === 0){
         var invoiceDate = {Key: '', Value: ''}
@@ -565,12 +551,12 @@ class Invoice extends Component {
       return invoiceDate
     }
 
-    findInvoiceNumber(sortedForm, index){
+    findInvoiceNumber(sortedFormData, index){
       const { unscannedFiles, missingData } = this.state
 
-      // console.log(sortedForm);
+      // console.log(sortedFormData);
       // console.log(index);
-      var invoiceSearch = sortedForm.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('INVOICE') && !data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))
+      var invoiceSearch = sortedFormData.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes('INVOICE') && !data.Key.replace(/\s/g, '').toUpperCase().includes('DATE'))
 
       if (invoiceSearch.length === 0){
         var invoiceNumber = {Key: '', Value: ''}
@@ -610,13 +596,13 @@ class Invoice extends Component {
       return invoiceNumber
     }
 
-    findInvoiceTotal(sortedForm, index){
+    findInvoiceTotal(sortedFormData, index){
       const { unscannedFiles, missingData } = this.state
 
-      // console.log(sortedForm);
+      // console.log(sortedFormData);
       // console.log(index);
 
-      var vatSearch = sortedForm.filter(data => /\d/.test(JSON.stringify(data.Value).replace(/\s/g, '')) && JSON.stringify(data.Value).replace(/\s/g, '').includes('.') && !/[a-zA-Z]/.test(JSON.stringify(data.Value).replace(/\s/g, '')))
+      var vatSearch = sortedFormData.filter(data => /\d/.test(JSON.stringify(data.Value).replace(/\s/g, '')) && JSON.stringify(data.Value).replace(/\s/g, '').includes('.') && !/[a-zA-Z]/.test(JSON.stringify(data.Value).replace(/\s/g, '')))
       // console.log(vatSearch);
     
       var sampleIncludes = ['V.A.T.', 'V.A.T', 'TAX', 'VAT']
@@ -755,7 +741,7 @@ class Invoice extends Component {
 
     
     render() { 
-        const { pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+        const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
         
 
         if(pageLoaded){
@@ -774,6 +760,19 @@ class Invoice extends Component {
                   <div className="sidebarImport">
                     <Sidebar currentTab={'Invoice'}/>
                   </div>  
+
+                  <Dialog
+                    isShown={mobileScanDialog}
+                    title="Incoming Mobile Scan"
+                    onCloseComplete={() => this.setState({ mobileScanDialog: false })}
+                    hasFooter={false}
+                    preventBodyScrolling
+                  >
+                    <Pane display='flex' justifyContent='space-between' padding={50}>
+                      <Button onClick={() => this.acceptIncomingData(mobileScanData)} appearance="primary">Accept Incoming Data</Button>
+                      <Button onClick={() => this.declineIncomingData(mobileScanData)} appearance="primary" intent='danger'>Decline Incoming Data</Button>
+                    </Pane>
+                  </Dialog>
 
                 <div className="mainContent">    
 

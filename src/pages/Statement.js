@@ -65,9 +65,9 @@ class Statement extends Component {
           csv: [],
           keyMap: '',
           formData: '',
-          sampleData: [],
+          tableData: [],
           imageDataURL: null,
-          sortedForm: {},
+          sortedFormData: {},
           header: [
             [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]            
           ],
@@ -218,8 +218,6 @@ class Statement extends Component {
             Payload: JSON.stringify(targetImage)
           };
           
-          // create variable to hold data returned by that Lambda function
-          var pullResults;
 
           const lambdaPromise = await new Promise((resolve, reject) => lambda.invoke({
             Payload: JSON.stringify(targetImage),
@@ -232,84 +230,8 @@ class Statement extends Component {
 
          
 
-          if(lambdaData.body){            
+          if(lambdaData.body){  this.prepareIncomingData(lambdaData.body, index, targetImage) }
 
-              if (lambdaData.body.tables) {
-                const TABLESmap = Object.values(lambdaData.body.tables);
-                // console.log(TABLESmap);
-
-                var datasheetTABLES = []
-
-                for (var k = 0; k < TABLESmap.length; k++) {
-                  const splitNLData = TABLESmap[k].split(/\r\n|\r|\n/)
-                  var gridData = []
-
-                  for (var i = 0; i < splitNLData.length; i++) {
-                      var splitCommaData = splitNLData[i].split(',')
-                      var row = []
-                      for (var j = 0; j < splitCommaData.length; j++) {
-                        var item = {};
-                        item.value = splitCommaData[j];
-                        row.push(item);              
-                      }           
-                      gridData.push(row)
-                  }
-                  // console.log(gridData)
-                  datasheetTABLES.push(gridData)
-                }
-                // console.log(datasheetTABLES);
-                this.setState({ sampleData: datasheetTABLES })
-              }            
-
-              if (lambdaData.body.kv && lambdaData.body.key_map) {            
-
-                const FD = lambdaData.body.kv
-                const KM = lambdaData.body.key_map
-
-                const FDmap = Object.entries(FD)
-                const KMmap = Object.entries(KM)
-
-                var sortedForm = []
-                
-                FDmap.map(FDdata => {
-                    KMmap.map(KMdata => {
-                        if(FDdata[0] === KMdata[0]){
-                            sortedForm.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
-                        }
-                    })
-                })   
-
-                sortedForm.sort(function(a, b) {
-                    return a.Top - b.Top;
-                });
-                console.log(sortedForm)
-                // console.log(JSON.stringify(sortedForm))
-                
-                var form = []
-                sortedForm.map( SF => {             
-                  var arr = [{value: SF.Key}, {value: SF.Value}]
-                  form.push(arr)
-                })
-
-                // console.log('Tables');
-                // console.log(datasheetTABLES);
-                // console.log('Formdata');
-                // console.log(lambdaData.body.kv);
-                // console.log('KeyMap');
-                // console.log(lambdaData.body.key_map);
-                // console.log('SortedForm');
-                // console.log(sortedForm);
-                // console.log('Form');
-                // console.log(form);
-
-                // scannedFileData.push(form)
-                // scannedFileData.push(datasheetTABLES)
-                // console.log(scannedFileData);
-                this.setState({ formData: lambdaData.body.kv, keyMap: lambdaData.body.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData })
-              }
-              this.prepareAllCSV()
-              this.deleteS3(targetImage)              
-          }
           return true
 
    
@@ -320,6 +242,69 @@ class Statement extends Component {
         }
         
     } 
+
+    prepareIncomingData(lambdaData, index, targetImage){
+
+      const { scannedFileData } = this.state 
+
+      if (lambdaData.tables) {
+        const lambdaTableData = Object.values(lambdaData.tables);
+
+        var newTableData = []
+
+        for (var k = 0; k < lambdaTableData.length; k++) {
+          const splitTableData = lambdaTableData[k].split(/\r\n|\r|\n/)
+          var gridData = []
+
+          for (var i = 0; i < splitTableData.length; i++) {
+              var csvTableData = splitTableData[i].split(',')
+              var row = []
+              for (var j = 0; j < csvTableData.length; j++) {
+                var item = {};
+                item.value = csvTableData[j];
+                row.push(item);              
+              }           
+              gridData.push(row)
+          }
+          // console.log(gridData)
+          newTableData.push(gridData)
+        }
+        // console.log(newTableData);
+        this.setState({ tableData: newTableData })
+      }            
+
+      if (lambdaData.kv && lambdaData.key_map) {    
+
+        const lambdaFormData = Object.entries(lambdaData.kv)
+        const lambdaKeyMap = Object.entries(lambdaData.key_map)
+
+        var sortedFormData = []
+        
+        lambdaFormData.map(FDdata => {
+            lambdaKeyMap.map(KMdata => {
+                if(FDdata[0] === KMdata[0]){
+                    sortedFormData.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
+                }
+            })
+        })   
+
+        sortedFormData.sort(function(a, b) {
+            return a.Top - b.Top;
+        });
+        console.log(sortedFormData)
+        // console.log(JSON.stringify(sortedFormData))
+        
+        var newFormData = []
+        sortedFormData.map( SF => {             
+          var arr = [{value: SF.Key}, {value: SF.Value}]
+          newFormData.push(arr)
+        })
+
+        this.setState({ sortedFormData: sortedFormData, formData: newFormData, scannedFileData: scannedFileData })
+      }
+      this.prepareAllCSV(newTableData, newFormData)
+      this.deleteS3(targetImage) 
+    }
 
     async getCurrentScanNumber(){
       const { unscannedFiles, scannedFiles, missingData, paymentID, scansExceeded } = this.state
@@ -428,40 +413,54 @@ class Statement extends Component {
 
     }
 
-    prepareAllCSV() {
-      const { sampleData, form, xlsxData, header } = this.state
+    prepareAllCSV(tableData, form) {
+      const { xlsxData, header } = this.state
+
+      console.log(tableData);
 
       var largestTableArrLength = 0
-
-      for(var i=0; i < sampleData.length; i++){ 
-        if(Math.max(...(sampleData[i].map(el => el.length))) > largestTableArrLength) {
-          var largestTableArrLength = Math.max(...(sampleData[i].map(el => el.length)))
+      
+      if(tableData){
+        if(tableData.length > 0){
+          for(var i=0; i < tableData.length; i++){ 
+            if(Math.max(...(tableData[i].map(el => el.length))) > largestTableArrLength) {
+              var largestTableArrLength = Math.max(...(tableData[i].map(el => el.length)))
+            }
+          }     
+        
+          var largestFormArrLength = Math.max(...(tableData[0].map(el => el.length)))
+          if(largestTableArrLength > largestFormArrLength){ var biggestArr = largestTableArrLength} else { var biggestArr = largestFormArrLength }     
         }
       }
-      
-      var largestFormArrLength = Math.max(...(sampleData[0].map(el => el.length)))
-      if(largestTableArrLength > largestFormArrLength){ var biggestArr = largestTableArrLength} else { var biggestArr = largestFormArrLength }        
 
-      for(var i=0; i < form.length; i++){          
-        var arr = form[i].map(row => {
-        var value = row
-        return value
-        })
-        var merged = [].concat.apply([], arr);
-        xlsxData.push(merged)
+      if(form){
+        if(form.length > 0){
+          for(var i=0; i < form.length; i++){          
+            var arr = form[i].map(row => {
+            var value = row
+            return value
+            })
+            var merged = [].concat.apply([], arr);
+            xlsxData.push(merged)
+          }
+        }
       }      
 
-      for(var i=0; i < sampleData.length; i++){ 
+      if(tableData){
+        if(tableData.length > 0){
+          for(var i=0; i < tableData.length; i++){ 
 
-        for(var j=0; j < sampleData[i].length; j++){          
-          var arr = sampleData[i][j].map(row => {
-              var value = row
-              return value
-          })
-          var merged = [].concat.apply([], arr);
-          xlsxData.push(merged)
-        }   
-      } 
+            for(var j=0; j < tableData[i].length; j++){          
+              var arr = tableData[i][j].map(row => {
+                  var value = row
+                  return value
+              })
+              var merged = [].concat.apply([], arr);
+              xlsxData.push(merged)
+            }   
+          } 
+        }
+      }
 
       // Making sure all array lengths are the same including header
       for(var i=0; i < xlsxData.length; i++){
@@ -489,86 +488,17 @@ class Statement extends Component {
       console.log(xlsxData);
     }
 
-    acceptIncomingData(data){
-      // Put incoming parsed mobile data into seperate array. Check if desktop app is scanning. 
-      // If scanning keep data in array until scan is complete and combine array afterwards.
-      // If not scanning, immediately add new array to datasheet.
-      // If another mobile scan comes in before decision to accept/deny then previous scan is erased.
+    acceptIncomingData(lambdaData){      
+      const { scannedFiles } = this.state
+      const index = scannedFiles.length
 
-      const { scannedFileData } = this.state
+      if(lambdaData){  this.prepareIncomingData(lambdaData.data, index, lambdaData.fileName) }   
 
-      console.log('Accept');
-      console.log(data);
-
-      let lambdaData = data.data
-      console.log(lambdaData);       
-
-      if (lambdaData.tables) {
-        const TABLESmap = Object.values(lambdaData.tables);
-        // console.log(TABLESmap);
-
-        var datasheetTABLES = []
-
-        for (var k = 0; k < TABLESmap.length; k++) {
-          const splitNLData = TABLESmap[k].split(/\r\n|\r|\n/)
-          var gridData = []
-
-          for (var i = 0; i < splitNLData.length; i++) {
-              var splitCommaData = splitNLData[i].split(',')
-              var row = []
-              for (var j = 0; j < splitCommaData.length; j++) {
-                var item = {};
-                item.value = splitCommaData[j];
-                row.push(item);              
-              }           
-              gridData.push(row)
-          }
-          // console.log(gridData)
-          datasheetTABLES.push(gridData)
-        }
-        // console.log(datasheetTABLES);
-        this.setState({ sampleData: datasheetTABLES })
-      }            
-
-      if (lambdaData.kv && lambdaData.key_map) {            
-
-        const FD = lambdaData.kv
-        const KM = lambdaData.key_map
-
-        const FDmap = Object.entries(FD)
-        const KMmap = Object.entries(KM)
-
-        var sortedForm = []
-        
-        FDmap.map(FDdata => {
-            KMmap.map(KMdata => {
-                if(FDdata[0] === KMdata[0]){
-                    sortedForm.unshift({ 'Key': FDdata[1].Key, 'Value': FDdata[1].Value, 'Top': KMdata[1].Geometry.BoundingBox.Top, 'Left': KMdata[1].Geometry.BoundingBox.Left })           
-                }
-            })
-        })   
-
-        sortedForm.sort(function(a, b) {
-            return a.Top - b.Top;
-        });
-        console.log(sortedForm)
-        // console.log(JSON.stringify(sortedForm))
-        
-        var form = []
-        sortedForm.map( SF => {             
-          var arr = [{value: SF.Key}, {value: SF.Value}]
-          form.push(arr)
-        })
-
-        this.setState({ formData: lambdaData.kv, keyMap: lambdaData.key_map, sortedForm: sortedForm, form: form, scannedFileData: scannedFileData, mobileScanDialog: false }, () => this.prepareAllCSV())
-      }
+      this.setState({ mobileScanDialog: false })
       
-      // this.prepareAllCSV()
-      this.deleteS3(data.fileName)       
     }
 
     declineIncomingData(data){
-      this.deleteS3(data.fileName)
       console.log('Decline');
       this.setState({ mobileScanDialog: false })
     }
@@ -665,7 +595,7 @@ class Statement extends Component {
     }
     
     render() { 
-        const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, sampleData, imageDataURL, sortedForm, form, scanComplete, isScanning } = this.state  
+        const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, form, scanComplete, isScanning } = this.state  
 
         if(pageLoaded){
           if(!isLoggedIn){
