@@ -155,7 +155,7 @@ class Statement extends Component {
         })           
       })
       
-      return () => unsubscribe()
+      // return () => unsubscribe()
     }
 
     handleRenderer(event, data) {
