@@ -326,8 +326,6 @@ class Statement extends Component {
             return false           
           } else {      
             this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles, scanComplete: false, isScanning: true })
-            var increment = scansCompleted + 1
-            teamRef.update({ ScansCompleted: increment });
             return true               
           }
 
@@ -571,6 +569,9 @@ class Statement extends Component {
       const increment = firebase.firestore.FieldValue.increment(1);
       const userRef = db.collection("users").doc(userToken);
       userRef.update({ NoOfScans: increment });  
+
+      const teamRef = db.collection("teams").doc(paymentID);
+      teamRef.update({ ScansCompleted: increment });
     }
 
     refresh(){

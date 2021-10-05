@@ -307,8 +307,6 @@ class Invoice extends Component {
             return false           
           } else {      
             this.setState({ scannedFiles: scannedFiles, unscannedFiles: unscannedFiles, scanComplete: false, isScanning: true })
-            var increment = scansCompleted + 1
-            teamRef.update({ ScansCompleted: increment });
             return true               
           }
 
@@ -737,8 +735,12 @@ class Invoice extends Component {
     updateUserScanNumber(){
       const { userToken, paymentID } = this.state
       const increment = firebase.firestore.FieldValue.increment(1);
+
       const userRef = db.collection("users").doc(userToken);
       userRef.update({ NoOfScans: increment });  
+
+      const teamRef = db.collection("teams").doc(paymentID);
+      teamRef.update({ ScansCompleted: increment });
     }
 
     refresh(){
