@@ -29,7 +29,7 @@ export default class login extends Component {
         firebase.auth().signInWithEmailAndPassword(email, password)
         .then((result) => {
             Cookie.set('token', result.user.uid);     
-            this.props.history.push('/Home') 
+            this.props.history.push('/Invoice') 
         })
         .catch((error) => {
             console.log(error)

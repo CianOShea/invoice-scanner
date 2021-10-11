@@ -16,11 +16,11 @@ export const Routes = () => {
       {/* <Navbar /> */}
       {/* <Sidebar/> */}
       <Switch>
-        <Route exact path="/Home" component={Home} />
-          <Route exact path="/">
-            <Redirect to="/Home" />
-        </Route>
-        <Route exact path="/Invoice" component={Invoice} />        
+        {/* <Route exact path="/Home" component={Home} /> */}        
+        <Route exact path="/Invoice" component={Invoice} />       
+        <Route exact path="/">
+          <Redirect to="/Invoice" />
+        </Route> 
         <Route exact path="/Statement" component={Statement} />
         <Route exact path="/Login" component={Login} />
       </Switch>

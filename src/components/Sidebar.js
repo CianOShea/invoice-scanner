@@ -39,18 +39,21 @@ function Sidebar(props) {
             // An error happened.
         });
     }
+
+    const onDashboard = () => {
+        window.shell.openExternal('https://scanner-website.herokuapp.com/dashboard')
+    }
+
     return (
         <div className="sidebar">
-                <Link to="/Home" className="homeLink"> 
-                    <Tooltip content="Home" position={Position.RIGHT}>
-                        <svg className="sidebarLogo" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                        </svg>
-                    </Tooltip>
-                    <div className='sidebarTitleDiv'>
-                        <h2 className='sidebarTitle'>InvoSync</h2>
-                    </div>
-                </Link>   
+            <Pane display='flex' flexDirection='row'>
+                <svg className="sidebarLogo" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <div className='sidebarTitleDiv'>
+                    <h2 className='sidebarTitle'>InvoSync</h2>
+                </div>
+            </Pane>
             <div className="sidebarContent">
                 <nav>
                 {
@@ -71,6 +74,8 @@ function Sidebar(props) {
                     </Fragment>
                 }
                 </nav>
+
+                <button onClick={() => onDashboard()} className="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-green-600 rounded text-md">Dashboard</button>      
                 {
                     isLoggedIn &&
                     <Fragment>

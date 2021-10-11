@@ -130,12 +130,12 @@ class Statement extends Component {
               }
           }).catch((error) => {
               console.log("Error getting document:", error);
-              this.setState({ pageLoaded: true, redirect: '/Home' })
+              this.setState({ pageLoaded: true, redirect: '/Login' })
           });
         } else {
           // No user is signed in.
           console.log('Not logged In');
-          this.setState({ pageLoaded: true, redirect: '/Home' })
+          this.setState({ pageLoaded: true, redirect: '/Login' })
         }
       });
 
