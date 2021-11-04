@@ -1,8 +1,8 @@
 import React, { useState, useEffect ,Component, Fragment } from 'react';
-import { Tooltip, Position, Pane, Heading } from 'evergreen-ui'
+import { Tooltip, Position, Pane, Heading, Button, HomeIcon } from 'evergreen-ui'
 import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWallet, faPrint, faArchive, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { faWallet, faPrint, faArchive, faSignInAlt, faSignOutAlt, faFileInvoice, faTable, faHome } from '@fortawesome/free-solid-svg-icons'
 import Cookie from 'js-cookie'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
@@ -46,7 +46,7 @@ function Sidebar(props) {
 
     return (
         <div className="sidebar">
-            <Pane display='flex' flexDirection='row'>
+            <Pane display='flex' flexDirection='row' alignItems='center'>
                 <svg className="sidebarLogo" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                 </svg>
@@ -54,28 +54,37 @@ function Sidebar(props) {
                     <h2 className='sidebarTitle'>InvoSync</h2>
                 </div>
             </Pane>
-            <div className="sidebarContent">
+            <div className="flex flex-col justify-between flex-1 mt-6 mw-100">
                 <nav>
                 {
-                     isLoggedIn &&
+                    isLoggedIn &&
                     <Fragment>
                         <Tooltip content="Invoice" position={Position.RIGHT}>
-                            <Link className={`sidebarItem ${props.currentTab === 'Invoice' && "backgroundBlue600"}`} to="/Invoice">                                                           
-                                <FontAwesomeIcon icon={faArchive} />                            
-                                <span className="sidebarItemTitle">Invoice</span>
+                            <Link className={`flex no-underline items-center px-2 py-2 mt-5 text-white rounded-lg justify-center lg:justify-start ${props.currentTab === 'Invoice' && "backgroundBlue600"}`} to="/Invoice">                                                           
+                                <div className="flex px-2">
+                                    <FontAwesomeIcon icon={faFileInvoice} />
+                                </div>                           
+                                <span className="hidden text-xl font-medium px-2 lg:flex">Invoice</span>
                             </Link>      
                         </Tooltip>                  
                         <Tooltip content="Statement" position={Position.RIGHT}>
-                            <Link className={`sidebarItem ${props.currentTab === 'Statement' && "backgroundBlue600"}`} to="/Statement">                                    
-                                <FontAwesomeIcon icon={faWallet} />
-                                <span className="sidebarItemTitle">Statement</span>
+                            <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start ${props.currentTab === 'Statement' && "backgroundBlue600"}`} to="/Statement">                                    
+                                <div className="flex px-2">
+                                    <FontAwesomeIcon icon={faTable} />
+                                </div>
+                                <span className="hidden text-xl font-medium px-2 lg:flex">Statement</span>
                             </Link>   
                         </Tooltip>
                     </Fragment>
                 }
                 </nav>
-
-                <button onClick={() => onDashboard()} className="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-green-600 rounded text-md">Dashboard</button>      
+                
+                <button onClick={() => onDashboard()} className="flex mx-auto items-center text-white bg-green-500 py-2 px-2 focus:outline-none hover:bg-green-600 rounded text-md">
+                    <div className="flex px-2">
+                        <HomeIcon color='white'/>
+                    </div>
+                    <span className="hidden text-xl font-medium px-2 lg:flex">Dashboard</span>      
+                </button>
                 {
                     isLoggedIn &&
                     <Fragment>

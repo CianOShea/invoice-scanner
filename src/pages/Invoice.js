@@ -127,7 +127,7 @@ class Invoice extends Component {
       this.setState({ scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
 
       const userID = Cookie.get('token')
-      const uploadsRef = db.collection('mobileScans').doc(userID).collection('invoiceScans')
+      const uploadsRef = db.collection('mobileScans').doc(userID).collection('mobileScans')
 
       const unsubscribe = uploadsRef.onSnapshot(snapshot => {
         let changes = snapshot.docChanges();
@@ -435,7 +435,9 @@ class Invoice extends Component {
 
       const mobileFile = { fileName: 'Mobile Scan' }
 
-      if(mobileScanData){  this.prepareIncomingData(mobileScanData.data, index, mobileScanData.fileName, mobileFile) }  
+      console.log(mobileScanData);
+
+      if(mobileScanData){  this.prepareIncomingData(mobileScanData, index, mobileFile, mobileFile) }  
 
       const newScannedFile = { fileName: 'Mobile Scan' }
 

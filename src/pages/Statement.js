@@ -144,7 +144,7 @@ class Statement extends Component {
       this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
 
       const userID = Cookie.get('token')
-      const uploadsRef = db.collection('mobileScans').doc(userID).collection('statementsScans')
+      const uploadsRef = db.collection('mobileScans').doc(userID).collection('mobileScans')
 
       const unsubscribe = uploadsRef.onSnapshot(snapshot => {
         let changes = snapshot.docChanges();
