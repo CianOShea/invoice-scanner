@@ -72,7 +72,7 @@ class Invoice extends Component {
           imageDataURL: null,
           sortedFormData: {},
           header: [
-            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'VAT' }, { value: 'Total' }]            
+            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'Total' }, { value: 'VAT' }]            
           ],
           grid: [
             [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
@@ -279,7 +279,7 @@ class Invoice extends Component {
         const currentAllData = { data: sortedFormData, fileName: unscannedFiles.fileName }
         missingData.push(currentAllData)
 
-        scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.VAT.Value }, { value: invoiceTotal.TOTAL.Value }])                
+        scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.TOTAL.Value }, { value: invoiceTotal.VAT.Value },])                
       
         this.setState({ sortedFormData: sortedFormData, formData: newFormData, scannedFileData: scannedFileData, missingData: missingData })
       }
@@ -1103,34 +1103,6 @@ class Invoice extends Component {
                                 </Fragment>
 
                                 <Fragment>
-                                <Heading size={500}>VAT:</Heading>
-                                  <div className='missingDataItem'>   
-                                    <div className='missingDataContent'>
-                                      <SelectMenu
-                                        width={300}
-                                        title="VAT"
-                                        options={data.data.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
-                                        // selected={selected}
-                                        onSelect={(item) => {scannedFileData[index][4].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
-                                        closeOnSelect
-                                        hasFilter={false}
-                                        position={Position.BOTTOM_LEFT}
-                                        emptyView={
-                                          <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
-                                            <Text size={300}>NO OPTIONS FOUND</Text>
-                                          </Pane>
-                                        }
-                                      >
-                                        <Button width={300}>{'Select VAT...'}</Button>
-                                      </SelectMenu> 
-                                    </div> 
-                                    <div className='missingDataContent'>                        
-                                      <TextInput width={300} name="text-input-name" placeholder="VAT" value={scannedFileData[index][4].value} onChange={e => {scannedFileData[index][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
-                                    </div> 
-                                  </div>                                     
-                                </Fragment>
-
-                                <Fragment>
                                 <Heading size={500}>Total:</Heading>
                                   <div className='missingDataItem'>   
                                     <div className='missingDataContent'>
@@ -1139,7 +1111,7 @@ class Invoice extends Component {
                                         title="Total"
                                         options={data.data.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
                                         // selected={selected}
-                                        onSelect={(item) => {scannedFileData[index][5].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
+                                        onSelect={(item) => {scannedFileData[index][4].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
                                         closeOnSelect
                                         hasFilter={false}
                                         position={Position.BOTTOM_LEFT}
@@ -1153,10 +1125,38 @@ class Invoice extends Component {
                                       </SelectMenu> 
                                     </div> 
                                     <div className='missingDataContent'>                        
-                                      <TextInput width={300} name="text-input-name" placeholder="Total" value={scannedFileData[index][5].value} onChange={e => {scannedFileData[index][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
+                                      <TextInput width={300} name="text-input-name" placeholder="Total" value={scannedFileData[index][4].value} onChange={e => {scannedFileData[index][4].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
                                     </div> 
                                   </div>                                    
                                 </Fragment>
+
+                                <Fragment>
+                                <Heading size={500}>VAT:</Heading>
+                                  <div className='missingDataItem'>   
+                                    <div className='missingDataContent'>
+                                      <SelectMenu
+                                        width={300}
+                                        title="VAT"
+                                        options={data.data.map((data) => ({ label: `${data.Key} --- ${data.Value}`, value: data }))}
+                                        // selected={selected}
+                                        onSelect={(item) => {scannedFileData[index][5].value = item.value.Value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}
+                                        closeOnSelect
+                                        hasFilter={false}
+                                        position={Position.BOTTOM_LEFT}
+                                        emptyView={
+                                          <Pane height="100%" display="flex" alignItems="center" justifyContent="center">
+                                            <Text size={300}>NO OPTIONS FOUND</Text>
+                                          </Pane>
+                                        }
+                                      >
+                                        <Button width={300}>{'Select VAT...'}</Button>
+                                      </SelectMenu> 
+                                    </div> 
+                                    <div className='missingDataContent'>                        
+                                      <TextInput width={300} name="text-input-name" placeholder="VAT" value={scannedFileData[index][5].value} onChange={e => {scannedFileData[index][5].value = e.target.value; this.setState({ scannedFileData: scannedFileData }, () => this.updateSessionStorage())}}/>
+                                    </div> 
+                                  </div>                                     
+                                </Fragment>                                
                               
                             </Pane>
                         ))) 
