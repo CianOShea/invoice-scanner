@@ -14,17 +14,12 @@ import '../index.css';
 import '../grid.css';
 import { Button, Pane, Text, Table, Heading, Spinner, Dialog, TextInput, SelectMenu, Position, CornerDialog, Tablist, Tab, Paragraph, toaster } from 'evergreen-ui'
 import { Divider } from 'antd';
-
 import AWS from 'aws-sdk';
-
 import { saveAs } from 'file-saver';
 import XLSX from 'xlsx';
-
 import _ from 'lodash'
 import Select from 'react-select'
-
 import Cookie from 'js-cookie'
-
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
 
