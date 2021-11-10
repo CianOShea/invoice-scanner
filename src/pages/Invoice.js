@@ -36,6 +36,8 @@ AWS.config.update({
 
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
+const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
+
 
 class Invoice extends Component {
 
@@ -69,14 +71,7 @@ class Invoice extends Component {
           header: [
             [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'Total' }, { value: 'VAT' }]            
           ],
-          grid: [
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            
-          ],
+          grid: staticGrid,
           missingDataDialog: false,
           cornerDialog: false,
           array: [],
@@ -93,7 +88,7 @@ class Invoice extends Component {
 
     componentDidMount(){
 
-      const { mobileScanData } = this.state
+      const { mobileScanData, grid } = this.state
      
       firebase.auth().onAuthStateChanged(user => {
         if (user) {
@@ -115,11 +110,12 @@ class Invoice extends Component {
         }
       });
 
+      if(sessionStorage.getItem('invoiceGrid')) { var invoiceGrid = JSON.parse(sessionStorage.getItem('invoiceGrid')) } else { var invoiceGrid = grid }
       if(sessionStorage.getItem('invoiceScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('invoiceScannedFiles')) } else { var scannedFiles = [] }
       if(sessionStorage.getItem('invoiceScannedFileData')) { var scannedFileData = JSON.parse(sessionStorage.getItem('invoiceScannedFileData')) } else { var scannedFileData = [] }
       if(sessionStorage.getItem('invoiceMissingData')) { var missingData = JSON.parse(sessionStorage.getItem('invoiceMissingData')) } else { var missingData = [] }
       if(sessionStorage.getItem('invoiceXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('invoiceXlsxData')) } else { var xlsxData = [] }
-      this.setState({ scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
+      this.setState({ grid: invoiceGrid, scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
 
       const userID = Cookie.get('token')
       const uploadsRef = db.collection('mobileScans').doc(userID).collection('mobileScans')
@@ -742,7 +738,8 @@ class Invoice extends Component {
 
     refresh(){
         this.myRef.current.children[0].value = null
-        this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        this.setState({ grid: staticGrid, xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        sessionStorage.setItem('invoiceGrid', JSON.stringify(staticGrid))
         sessionStorage.setItem('invoiceScannedFiles', [])
         sessionStorage.setItem('invoiceScannedFileData', [])
         sessionStorage.setItem('invoiceMissingData', [])
@@ -761,8 +758,9 @@ class Invoice extends Component {
     }
 
     updateSessionStorage(){
-      const { scannedFiles, scannedFileData, missingData, xlsxData } = this.state
+      const { scannedFiles, scannedFileData, missingData, xlsxData, grid } = this.state
 
+      sessionStorage.setItem('invoiceGrid', JSON.stringify(grid))
       sessionStorage.setItem('invoiceScannedFiles', JSON.stringify(scannedFiles))
       sessionStorage.setItem('invoiceScannedFileData', JSON.stringify(scannedFileData))
       sessionStorage.setItem('invoiceMissingData', JSON.stringify(missingData))
@@ -953,7 +951,7 @@ class Invoice extends Component {
                                   changes.forEach(({ cell, row, col, value }) => {
                                     grid[row][col] = { ...grid[row][col], value };
                                   });
-                                  this.setState({ grid });
+                                  this.setState({ grid }, () => this.updateSessionStorage());
                                 }}                        
                               />
                           }     

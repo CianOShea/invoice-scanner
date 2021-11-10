@@ -38,6 +38,7 @@ AWS.config.update({
 
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
+const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
 
 class Statement extends Component {
 
@@ -71,13 +72,7 @@ class Statement extends Component {
           header: [
             [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]            
           ],
-          grid: [
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }],
-            [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]
-          ],
+          grid: staticGrid,
           missingDataDialog: false,
           cornerDialog: false,
           form: [],
@@ -94,6 +89,9 @@ class Statement extends Component {
       }
    }
     async componentDidMount(){
+
+      const { grid } = this.state
+
       window.ipcRenderer.on('test-back', this.handleRenderer)
 
       window.ipcRenderer.on('message', (event, text) => {
@@ -139,9 +137,10 @@ class Statement extends Component {
         }
       });
 
+      if(sessionStorage.getItem('statementGrid')) { var statementGrid = JSON.parse(sessionStorage.getItem('statementGrid')) } else { var statementGrid = grid }
       if(sessionStorage.getItem('statementScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('statementScannedFiles')) } else { var scannedFiles = [] }
       if(sessionStorage.getItem('statementXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('statementXlsxData')) } else { var xlsxData = [] }      
-      this.setState({ scannedFiles: scannedFiles, xlsxData: xlsxData })
+      this.setState({ grid: statementGrid, scannedFiles: scannedFiles, xlsxData: xlsxData })
 
       const userID = Cookie.get('token')
       const uploadsRef = db.collection('mobileScans').doc(userID).collection('mobileScans')
@@ -576,7 +575,8 @@ class Statement extends Component {
 
     refresh(){
         this.myRef.current.children[0].value = null
-        this.setState({ xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        this.setState({ grid: staticGrid, xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
+        sessionStorage.setItem('statementGrid', JSON.stringify(staticGrid))
         sessionStorage.setItem('statementScannedFiles', [])
         sessionStorage.setItem('statementXlsxData', [])
     }
@@ -592,8 +592,9 @@ class Statement extends Component {
     }
 
     updateSessionStorage(){
-      const { scannedFiles, scannedFileData, missingData, xlsxData } = this.state
+      const { scannedFiles, scannedFileData, missingData, xlsxData, grid } = this.state
 
+      sessionStorage.setItem('statementGrid', JSON.stringify(grid))
       sessionStorage.setItem('statementScannedFiles', JSON.stringify(scannedFiles))
       sessionStorage.setItem('statementXlsxData', JSON.stringify(xlsxData))
     }
@@ -771,7 +772,7 @@ class Statement extends Component {
                                 changes.forEach(({ cell, row, col, value }) => {
                                   grid[row][col] = { ...grid[row][col], value };
                                 });
-                                this.setState({ grid });
+                                this.setState({ grid }, () => this.updateSessionStorage());
                               }}                        
                             />
                         }      
