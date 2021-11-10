@@ -47,6 +47,7 @@ class id extends Component {
     
       this.state = {   
           pageName: '',
+          pageHeaders: [],
           pageLoaded: false,
           userToken: '',
           isLoggedIn: false,
@@ -89,13 +90,25 @@ class id extends Component {
 
     componentDidMount(){
 
-      const { mobileScanData, grid } = this.state
+      const { mobileScanData, grid, pageName, pageHeaders } = this.state
+
+      console.log(pageHeaders);
      
       firebase.auth().onAuthStateChanged(user => {
         if (user) {
           db.collection("users").doc(user.uid).get().then((doc) => {
               if (doc.exists) {
-                  this.setState({ userToken: user.uid, paymentID: doc.data().paymentID, isLoggedIn: true, pageLoaded: true })               
+                  this.setState({ userToken: user.uid, paymentID: doc.data().paymentID, isLoggedIn: true, pageLoaded: true })      
+                  // db.collection("teams").doc(doc.data().paymentID).get().then((doc) => {
+                  //     if (doc.exists) {
+                  //         console.log(doc.data().templates)
+                  //         const templateIndex = doc.data().templates.findIndex(template => template.name === pageName)
+                  //         console.log(templateIndex)
+                  //     }else {
+                  //         // doc.data() will be undefined in this case
+                  //         console.log("No such document!");
+                  //     }
+                  // })           
               } else {
                   // doc.data() will be undefined in this case
                   console.log("No such document!");
@@ -136,7 +149,8 @@ class id extends Component {
     static getDerivedStateFromProps(props, state){
       console.log(props)
       return {
-          pageName: props.match.params.id
+          pageName: props.location.query.templateData.name,
+          pageHeaders: props.location.query.templateData.headers
       };
     }
 
@@ -776,8 +790,7 @@ class id extends Component {
 
     
     render() { 
-        const { pageName, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
-        
+        const { pageName, pageHeaders, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
         
         if(pageLoaded){
           if(!isLoggedIn){

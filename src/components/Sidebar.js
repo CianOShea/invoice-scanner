@@ -29,6 +29,7 @@ function Sidebar(props) {
                     db.collection("teams").doc(doc.data().paymentID).get().then((doc) => {
                         if (doc.exists) {
                             setTemplates(doc.data().templates)
+                            console.log(doc.data().templates)
                         }else {
                             // doc.data() will be undefined in this case
                             console.log("No such document!");
@@ -99,12 +100,12 @@ function Sidebar(props) {
                         </Tooltip>
                         {
                             templates.map((template, index) => (
-                                <Tooltip content={template} position={Position.RIGHT}>
-                                    <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === `/${template}` && "backgroundBlue600"}`} to={{pathname: `/${template}`, query: {templateName: template}}}>                                    
+                                <Tooltip content={template.name} position={Position.RIGHT}>
+                                    <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === `/${template.name}` && "backgroundBlue600"}`} to={{pathname: `/${template.name}`, query: {templateData: template}}}>                                    
                                         <div className="flex px-2">
                                             <FontAwesomeIcon icon={faTable} />
                                         </div>
-                                        <span className="hidden text-xl font-medium px-2 lg:flex">{template}</span>
+                                        <span className="hidden text-xl font-medium px-2 lg:flex">{template.name}</span>
                                     </Link>   
                                 </Tooltip>
                             ))
