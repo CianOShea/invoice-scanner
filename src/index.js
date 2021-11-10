@@ -8,9 +8,10 @@ import Upload from './Upload'
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Routes } from './Routes';
 import * as serviceWorker from './serviceWorker';
+import Sidebar from './components/Sidebar';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <React.StrictMode>    
     <Router>
       <Routes />
     </Router>

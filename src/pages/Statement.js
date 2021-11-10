@@ -613,7 +613,7 @@ class Statement extends Component {
         return ( 
             <div className='mainPage'>
                 <div className="sidebarImport">
-                  <Sidebar currentTab={'Statement'} />
+                  {/* <Sidebar currentTab={'Statement'} /> */}
                 </div>  
 
                 <Dialog

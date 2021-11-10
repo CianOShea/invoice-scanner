@@ -1,6 +1,6 @@
 import React, { useState, useEffect ,Component, Fragment } from 'react';
 import { Tooltip, Position, Pane, Heading, Button, HomeIcon } from 'evergreen-ui'
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWallet, faPrint, faArchive, faSignInAlt, faSignOutAlt, faFileInvoice, faTable, faHome } from '@fortawesome/free-solid-svg-icons'
 import Cookie from 'js-cookie'
@@ -10,16 +10,38 @@ const db = firebase.firestore();
 function Sidebar(props) {
 
     const history = useHistory(); 
+    const location = useLocation();
+    console.log(location) 
 
     const [user, setUser] = useState(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [currentTab, setCurrentTab] = useState('Home')
+    const [templates, setTemplates] = useState([])
 
     useEffect(() => {
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
             setUser(user)
             setIsLoggedIn(true)
+            
+            db.collection("users").doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    db.collection("teams").doc(doc.data().paymentID).get().then((doc) => {
+                        if (doc.exists) {
+                            setTemplates(doc.data().templates)
+                        }else {
+                            // doc.data() will be undefined in this case
+                            console.log("No such document!");
+                        }
+                    })    
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+
             } else {
             // No user is signed in.
             setUser(null)
@@ -60,7 +82,7 @@ function Sidebar(props) {
                     isLoggedIn &&
                     <Fragment>
                         <Tooltip content="Invoice" position={Position.RIGHT}>
-                            <Link className={`flex no-underline items-center px-2 py-2 mt-5 text-white rounded-lg justify-center lg:justify-start ${props.currentTab === 'Invoice' && "backgroundBlue600"}`} to="/Invoice">                                                           
+                            <Link className={`flex no-underline items-center px-2 py-2 mt-5 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === '/Invoice' && "backgroundBlue600"}`} to="/Invoice">                                                           
                                 <div className="flex px-2">
                                     <FontAwesomeIcon icon={faFileInvoice} />
                                 </div>                           
@@ -68,13 +90,25 @@ function Sidebar(props) {
                             </Link>      
                         </Tooltip>                  
                         <Tooltip content="Statement" position={Position.RIGHT}>
-                            <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start ${props.currentTab === 'Statement' && "backgroundBlue600"}`} to="/Statement">                                    
+                            <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === '/Statement' && "backgroundBlue600"}`} to="/Statement">                                    
                                 <div className="flex px-2">
                                     <FontAwesomeIcon icon={faTable} />
                                 </div>
                                 <span className="hidden text-xl font-medium px-2 lg:flex">Statement</span>
                             </Link>   
                         </Tooltip>
+                        {
+                            templates.map((template, index) => (
+                                <Tooltip content={template} position={Position.RIGHT}>
+                                    <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === `/${template}` && "backgroundBlue600"}`} to={{pathname: `/${template}`, query: {templateName: template}}}>                                    
+                                        <div className="flex px-2">
+                                            <FontAwesomeIcon icon={faTable} />
+                                        </div>
+                                        <span className="hidden text-xl font-medium px-2 lg:flex">{template}</span>
+                                    </Link>   
+                                </Tooltip>
+                            ))
+                        }   
                     </Fragment>
                 }
                 </nav>

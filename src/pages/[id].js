@@ -39,13 +39,14 @@ const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVers
 const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
 
 
-class Invoice extends Component {
+class id extends Component {
 
    constructor(props) {
       super(props);
       this.myRef = React.createRef();
     
       this.state = {   
+          pageName: '',
           pageLoaded: false,
           userToken: '',
           isLoggedIn: false,
@@ -130,7 +131,13 @@ class Invoice extends Component {
         })           
       })
       
-      // return () => unsubscribe()
+    }
+
+    static getDerivedStateFromProps(props, state){
+      console.log(props)
+      return {
+          pageName: props.match.params.id
+      };
     }
 
     async handleSubmit(e){
@@ -769,7 +776,7 @@ class Invoice extends Component {
 
     
     render() { 
-        const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
+        const { pageName, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
         
         
         if(pageLoaded){
@@ -786,7 +793,7 @@ class Invoice extends Component {
                 <div className='mainPage'>
 
                   <div className="sidebarImport">
-                    {/* <Sidebar currentTab={'Invoice'}/> */}
+                    {/* <Sidebar currentTab={'id'}/> */}
                   </div>  
 
                   <Dialog
@@ -808,7 +815,7 @@ class Invoice extends Component {
 
                       <div>                      
                       
-                      <Heading size={900} marginBottom={50}>Invoice Scanner</Heading>
+                      <Heading size={900} marginBottom={50}>{pageName}</Heading>
 
                       <Form onSubmit={this.handleSubmit}>
                         <FormGroup>                 
@@ -1177,4 +1184,4 @@ class Invoice extends Component {
     }
 }
  
-export default Invoice;
+export default id;
