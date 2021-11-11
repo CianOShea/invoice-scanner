@@ -36,7 +36,7 @@ AWS.config.update({
 
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
-const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
+const staticGrid = [[{ value: '1'}, { value: '2' },{ value: '3' }, { value: '4' },{ value: '5' }, { value: '6' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
 
 
 class id extends Component {
@@ -71,7 +71,7 @@ class id extends Component {
           imageDataURL: null,
           sortedFormData: {},
           header: [
-            [{ value: 'Invoice No.' }, { value: 'Date of Issue' }, { value: 'Company Name' }, { value: 'Subtotal' }, { value: 'Total' }, { value: 'VAT' }]            
+            [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }]            
           ],
           grid: staticGrid,
           missingDataDialog: false,
@@ -90,17 +90,27 @@ class id extends Component {
 
    static getDerivedStateFromProps(props, state){
      if(props.location.query.templateData.name !== state.pageName){
-        // console.log(props)
+        console.log(props.location.query.templateData.headers)
         if(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) { var templateGrid = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) } else { var templateGrid = staticGrid }
         if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) { var scannedFiles = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) } else { var scannedFiles = [] }
         if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) { var scannedFileData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) } else { var scannedFileData = [] }
         if(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) { var missingData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) } else { var missingData = [] }
         if(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) { var xlsxData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) } else { var xlsxData = [] }
-        console.log(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`));
+        var headers = [[]]
+        props.location.query.templateData.headers.map(header => (headers[0].push({value: header.mainTitle}) ))
+        
+        var newGrid = []
+        for(var i=0; i < templateGrid.length; i++){
+          templateGrid[i].slice(0, headers[0].length)
+          console.log(templateGrid[i].slice(0, headers[0].length))
+          newGrid.push(templateGrid[i].slice(0, headers[0].length))
+        } 
+        console.log(newGrid);
+
         return {
             pageName: props.location.query.templateData.name,
-            pageHeaders: props.location.query.templateData.headers,
-            grid: templateGrid,
+            pageHeaders: headers,
+            grid: newGrid,
             scannedFiles: scannedFiles,
             scannedFileData: scannedFileData,
             missingData: missingData,
@@ -299,9 +309,11 @@ class id extends Component {
 
         console.log(newFormData);
 
+        // Convert to findData()
         const invoiceDate = this.findInvoiceDate(sortedFormData, index)
         const invoiceNumber = this.findInvoiceNumber(sortedFormData, index)
         const invoiceTotal = this.findInvoiceTotal(sortedFormData, index)  
+        // Return with object of values
         
         const currentAllData = { data: sortedFormData, fileName: unscannedFiles.fileName }
         missingData.push(currentAllData)
@@ -773,14 +785,25 @@ class id extends Component {
     }
 
     refresh(){
-        const { pageName } = this.state
-        this.myRef.current.children[0].value = null
-        this.setState({ grid: staticGrid, xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
-        sessionStorage.setItem(`${pageName}Grid`, JSON.stringify(staticGrid))
+        const { pageName, pageHeaders } = this.state
+        this.myRef.current.children[0].value = null       
+
+        console.log(pageHeaders);
+        var newGrid = []
+        for(var i=0; i < staticGrid.length; i++){
+          staticGrid[i].slice(0, pageHeaders[0].length)
+          console.log(staticGrid[i].slice(0, pageHeaders[0].length))
+          newGrid.push(staticGrid[i].slice(0, pageHeaders[0].length))
+        } 
+        console.log(newGrid);
+
+        sessionStorage.setItem(`${pageName}Grid`, JSON.stringify(newGrid))
         sessionStorage.setItem(`${pageName}ScannedFiles`, [])
         sessionStorage.setItem(`${pageName}ScannedFileData`, [])
         sessionStorage.setItem(`${pageName}MissingData`, [])
         sessionStorage.setItem(`${pageName}XlsxData`, [])
+
+        this.setState({ grid: newGrid, xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
     }
 
 
@@ -808,7 +831,8 @@ class id extends Component {
     render() { 
         const { pageName, pageHeaders, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
 
-        console.log(this.props)
+        console.log(this.state.header)
+        console.log(pageHeaders)
 
         if(pageLoaded){
           if(!isLoggedIn){
@@ -963,7 +987,7 @@ class id extends Component {
 
                       <div className='datasheetContainer'>
                           <ReactDataSheet
-                            data={this.state.header}
+                            data={pageHeaders}
                             valueRenderer={cell => { cell.readOnly = true; return cell.value; }}                                      
                           />
                           {
