@@ -88,11 +88,33 @@ class id extends Component {
       }
    }
 
+   static getDerivedStateFromProps(props, state){
+     if(props.location.query.templateData.name !== state.pageName){
+        // console.log(props)
+        if(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) { var templateGrid = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) } else { var templateGrid = staticGrid }
+        if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) { var scannedFiles = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) } else { var scannedFiles = [] }
+        if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) { var scannedFileData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) } else { var scannedFileData = [] }
+        if(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) { var missingData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) } else { var missingData = [] }
+        if(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) { var xlsxData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) } else { var xlsxData = [] }
+        console.log(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`));
+        return {
+            pageName: props.location.query.templateData.name,
+            pageHeaders: props.location.query.templateData.headers,
+            grid: templateGrid,
+            scannedFiles: scannedFiles,
+            scannedFileData: scannedFileData,
+            missingData: missingData,
+            xlsxData: xlsxData
+        };
+      }
+      return null
+    }
+
     componentDidMount(){
 
       const { mobileScanData, grid, pageName, pageHeaders } = this.state
 
-      console.log(pageHeaders);
+      // console.log(pageHeaders);
      
       firebase.auth().onAuthStateChanged(user => {
         if (user) {
@@ -124,12 +146,12 @@ class id extends Component {
         }
       });
 
-      if(sessionStorage.getItem('invoiceGrid')) { var invoiceGrid = JSON.parse(sessionStorage.getItem('invoiceGrid')) } else { var invoiceGrid = grid }
-      if(sessionStorage.getItem('invoiceScannedFiles')) { var scannedFiles = JSON.parse(sessionStorage.getItem('invoiceScannedFiles')) } else { var scannedFiles = [] }
-      if(sessionStorage.getItem('invoiceScannedFileData')) { var scannedFileData = JSON.parse(sessionStorage.getItem('invoiceScannedFileData')) } else { var scannedFileData = [] }
-      if(sessionStorage.getItem('invoiceMissingData')) { var missingData = JSON.parse(sessionStorage.getItem('invoiceMissingData')) } else { var missingData = [] }
-      if(sessionStorage.getItem('invoiceXlsxData')) { var xlsxData = JSON.parse(sessionStorage.getItem('invoiceXlsxData')) } else { var xlsxData = [] }
-      this.setState({ grid: invoiceGrid, scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
+      if(sessionStorage.getItem(`${pageName}Grid`)) { var templateGrid = JSON.parse(sessionStorage.getItem(`${pageName}Grid`)) } else { var templateGrid = grid }
+      if(sessionStorage.getItem(`${pageName}ScannedFiles`)) { var scannedFiles = JSON.parse(sessionStorage.getItem(`${pageName}ScannedFiles`)) } else { var scannedFiles = [] }
+      if(sessionStorage.getItem(`${pageName}ScannedFileData`)) { var scannedFileData = JSON.parse(sessionStorage.getItem(`${pageName}ScannedFileData`)) } else { var scannedFileData = [] }
+      if(sessionStorage.getItem(`${pageName}MissingData`)) { var missingData = JSON.parse(sessionStorage.getItem(`${pageName}MissingData`)) } else { var missingData = [] }
+      if(sessionStorage.getItem(`${pageName}XlsxData`)) { var xlsxData = JSON.parse(sessionStorage.getItem(`${pageName}XlsxData`)) } else { var xlsxData = [] }
+      this.setState({ grid: templateGrid, scannedFiles: scannedFiles, scannedFileData: scannedFileData, missingData: missingData, xlsxData: xlsxData })
 
       const userID = Cookie.get('token')
       const uploadsRef = db.collection('mobileScans').doc(userID).collection('mobileScans')
@@ -146,13 +168,6 @@ class id extends Component {
       
     }
 
-    static getDerivedStateFromProps(props, state){
-      console.log(props)
-      return {
-          pageName: props.location.query.templateData.name,
-          pageHeaders: props.location.query.templateData.headers
-      };
-    }
 
     async handleSubmit(e){
         e.preventDefault();
@@ -758,13 +773,14 @@ class id extends Component {
     }
 
     refresh(){
+        const { pageName } = this.state
         this.myRef.current.children[0].value = null
         this.setState({ grid: staticGrid, xlsxData: [], unscannedFiles: [], scannedFiles: [], missingData: [], scannedFileData: [] })
-        sessionStorage.setItem('invoiceGrid', JSON.stringify(staticGrid))
-        sessionStorage.setItem('invoiceScannedFiles', [])
-        sessionStorage.setItem('invoiceScannedFileData', [])
-        sessionStorage.setItem('invoiceMissingData', [])
-        sessionStorage.setItem('invoiceXlsxData', [])
+        sessionStorage.setItem(`${pageName}Grid`, JSON.stringify(staticGrid))
+        sessionStorage.setItem(`${pageName}ScannedFiles`, [])
+        sessionStorage.setItem(`${pageName}ScannedFileData`, [])
+        sessionStorage.setItem(`${pageName}MissingData`, [])
+        sessionStorage.setItem(`${pageName}XlsxData`, [])
     }
 
 
@@ -779,19 +795,21 @@ class id extends Component {
     }
 
     updateSessionStorage(){
-      const { scannedFiles, scannedFileData, missingData, xlsxData, grid } = this.state
-
-      sessionStorage.setItem('invoiceGrid', JSON.stringify(grid))
-      sessionStorage.setItem('invoiceScannedFiles', JSON.stringify(scannedFiles))
-      sessionStorage.setItem('invoiceScannedFileData', JSON.stringify(scannedFileData))
-      sessionStorage.setItem('invoiceMissingData', JSON.stringify(missingData))
-      sessionStorage.setItem('invoiceXlsxData', JSON.stringify(xlsxData))
+      const { pageName, scannedFiles, scannedFileData, missingData, xlsxData, grid } = this.state
+      console.log(grid);
+      sessionStorage.setItem(`${pageName}Grid`, JSON.stringify(grid))
+      sessionStorage.setItem(`${pageName}ScannedFiles`, JSON.stringify(scannedFiles))
+      sessionStorage.setItem(`${pageName}ScannedFileData`, JSON.stringify(scannedFileData))
+      sessionStorage.setItem(`${pageName}MissingData`, JSON.stringify(missingData))
+      sessionStorage.setItem(`${pageName}XlsxData`, JSON.stringify(xlsxData))
     }
 
     
     render() { 
         const { pageName, pageHeaders, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
-        
+
+        console.log(this.props)
+
         if(pageLoaded){
           if(!isLoggedIn){
             return (

@@ -11,7 +11,7 @@ function Sidebar(props) {
 
     const history = useHistory(); 
     const location = useLocation();
-    console.log(location) 
+    // console.log(location) 
 
     const [user, setUser] = useState(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -29,7 +29,7 @@ function Sidebar(props) {
                     db.collection("teams").doc(doc.data().paymentID).get().then((doc) => {
                         if (doc.exists) {
                             setTemplates(doc.data().templates)
-                            console.log(doc.data().templates)
+                            // console.log(doc.data().templates)
                         }else {
                             // doc.data() will be undefined in this case
                             console.log("No such document!");
