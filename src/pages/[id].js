@@ -48,6 +48,7 @@ class id extends Component {
       this.state = {   
           pageName: '',
           pageHeaders: [],
+          keys: [],
           pageLoaded: false,
           userToken: '',
           isLoggedIn: false,
@@ -89,33 +90,39 @@ class id extends Component {
    }
 
    static getDerivedStateFromProps(props, state){
-     if(props.location.query.templateData.name !== state.pageName){
-        console.log(props.location.query.templateData.headers)
-        if(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) { var templateGrid = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) } else { var templateGrid = staticGrid }
-        if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) { var scannedFiles = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) } else { var scannedFiles = [] }
-        if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) { var scannedFileData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) } else { var scannedFileData = [] }
-        if(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) { var missingData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) } else { var missingData = [] }
-        if(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) { var xlsxData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) } else { var xlsxData = [] }
-        var headers = [[]]
-        props.location.query.templateData.headers.map(header => (headers[0].push({value: header.mainTitle}) ))
-        
-        var newGrid = []
-        for(var i=0; i < templateGrid.length; i++){
-          templateGrid[i].slice(0, headers[0].length)
-          console.log(templateGrid[i].slice(0, headers[0].length))
-          newGrid.push(templateGrid[i].slice(0, headers[0].length))
-        } 
-        console.log(newGrid);
+     console.log(props);
+     if(!props.location.query){
+        props.history.push('/Invoice') 
+     } else{     
+      if(props.location.query.templateData.name !== state.pageName){
+          console.log(props.location.query.templateData.headers)
+          if(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) { var templateGrid = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}Grid`)) } else { var templateGrid = staticGrid }
+          if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) { var scannedFiles = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFiles`)) } else { var scannedFiles = [] }
+          if(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) { var scannedFileData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}ScannedFileData`)) } else { var scannedFileData = [] }
+          if(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) { var missingData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}MissingData`)) } else { var missingData = [] }
+          if(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) { var xlsxData = JSON.parse(sessionStorage.getItem(`${props.location.query.templateData.name}XlsxData`)) } else { var xlsxData = [] }
+          var headers = [[]]
+          props.location.query.templateData.headers.map(header => (headers[0].push({value: header.mainTitle}) ))
+          
+          var newGrid = []
+          for(var i=0; i < templateGrid.length; i++){
+            templateGrid[i].slice(0, headers[0].length)
+            console.log(templateGrid[i].slice(0, headers[0].length))
+            newGrid.push(templateGrid[i].slice(0, headers[0].length))
+          } 
+          console.log(newGrid);
 
-        return {
-            pageName: props.location.query.templateData.name,
-            pageHeaders: headers,
-            grid: newGrid,
-            scannedFiles: scannedFiles,
-            scannedFileData: scannedFileData,
-            missingData: missingData,
-            xlsxData: xlsxData
-        };
+          return {
+              pageName: props.location.query.templateData.name,
+              pageHeaders: headers,
+              keys: props.location.query.templateData.headers,
+              grid: newGrid,
+              scannedFiles: scannedFiles,
+              scannedFileData: scannedFileData,
+              missingData: missingData,
+              xlsxData: xlsxData
+          };
+        }
       }
       return null
     }
@@ -250,7 +257,7 @@ class id extends Component {
 
     prepareIncomingData(lambdaData, index, targetImage, unscannedFiles){
 
-      const { scannedFileData, missingData } = this.state 
+      const { scannedFileData, missingData, keys } = this.state 
 
       console.log(lambdaData);
       
@@ -310,15 +317,25 @@ class id extends Component {
         console.log(newFormData);
 
         // Convert to findData()
-        const invoiceDate = this.findInvoiceDate(sortedFormData, index)
-        const invoiceNumber = this.findInvoiceNumber(sortedFormData, index)
-        const invoiceTotal = this.findInvoiceTotal(sortedFormData, index)  
+        
+        console.log(keys);
+        const retrievedData = []
+        for (var i = 0; i < keys.length; i++) {
+          const scanDate = this.findData(sortedFormData, keys[i], index)
+          retrievedData.push(scanDate)
+        }
+        console.log(retrievedData);
+
         // Return with object of values
         
-        const currentAllData = { data: sortedFormData, fileName: unscannedFiles.fileName }
-        missingData.push(currentAllData)
+        // const currentAllData = { data: sortedFormData, fileName: unscannedFiles.fileName }
+        // missingData.push(currentAllData)
+        var eachValue = []
+        for (var i = 0; i < retrievedData.length; i++) {
+          eachValue.push({value: retrievedData[i].Value})
+        }
 
-        scannedFileData.push([{ value: invoiceNumber.Value }, { value: invoiceDate.Value }, { value: '' }, { value: invoiceTotal.SUBTOTAL.Value }, { value: invoiceTotal.TOTAL.Value }, { value: invoiceTotal.VAT.Value },])                
+        scannedFileData.push(eachValue)                
       
         this.setState({ sortedFormData: sortedFormData, formData: newFormData, scannedFileData: scannedFileData, missingData: missingData })
       }
@@ -565,6 +582,55 @@ class id extends Component {
       // }  
       // console.log(missingData);    
       // this.setState({ missingData: missingData });
+    }
+
+    findData(sortedFormData, key, index){
+      console.log(sortedFormData)
+      console.log(key.mainTitle)
+      console.log(index)      
+
+      const { unscannedFiles, missingData } = this.state
+
+      var dataSearch = sortedFormData.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(key.mainTitle.toUpperCase()))     
+
+      if (dataSearch.length === 0){
+        var dataFound = {Key: '', Value: ''}
+        // this.setMissingData(unscannedFiles[index].fileName, key.mainTitle, [], index)
+      }
+      if (dataSearch.length === 1){
+        var dataFound = dataSearch[0]
+      }
+      if (dataSearch.length > 1){
+        var sampleIncludes = key.additionalTitles
+        var includeVarsArr = []
+        for(var i=0; i < sampleIncludes.length; i++){
+          var loopTest = dataSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase().includes(sampleIncludes[i].toUpperCase()))               
+          if(loopTest.length > 0){
+            includeVarsArr.push(loopTest)
+          }
+          var multiData = [].concat.apply([], includeVarsArr)
+          multiData = [...new Set(multiData)]
+        } 
+        if(multiData.length === 1){
+          var dataFound = multiData[0]
+        } 
+        if(multiData.length > 1) {
+          var dataFound = {Key: '', Value: ''}
+          // this.setMissingData(unscannedFiles[index].fileName, key.mainTitle, multiData, index)
+        }
+        if(multiData.length === 0) {
+          var onlyData = dataSearch.filter(data => data.Key.replace(/\s/g, '').toUpperCase() === (key.mainTitle.toUpperCase()))
+          if(onlyData.length === 1){
+            var dataFound = onlyData[0]
+          } else {
+            var dataFound = {Key: '', Value: ''}
+            // this.setMissingData(unscannedFiles[index].fileName, key.mainTitle, dataSearch, index)
+          }          
+        }
+      }
+      console.log(dataSearch)
+      console.log(multiData)
+      return dataFound
     }
 
     findInvoiceDate(sortedFormData, index){
