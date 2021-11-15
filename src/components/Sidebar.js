@@ -2,7 +2,7 @@ import React, { useState, useEffect ,Component, Fragment } from 'react';
 import { Tooltip, Position, Pane, Heading, Button, HomeIcon } from 'evergreen-ui'
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWallet, faPrint, faArchive, faSignInAlt, faSignOutAlt, faFileInvoice, faTable, faHome } from '@fortawesome/free-solid-svg-icons'
+import { faWallet, faPrint, faArchive, faSignInAlt, faSignOutAlt, faFileInvoice, faTable, faPlusCircle } from '@fortawesome/free-solid-svg-icons'
 import Cookie from 'js-cookie'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
@@ -110,6 +110,15 @@ function Sidebar(props) {
                                 </Tooltip>
                             ))
                         }   
+
+                        <Tooltip content="Create Template +" position={Position.RIGHT}>
+                            <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === '/CreateTemplate' && "backgroundBlue600"}`} to="/CreateTemplate">                                    
+                                <div className="flex px-2">
+                                    <FontAwesomeIcon icon={faPlusCircle} />
+                                </div>
+                                <span className="hidden text-xl font-medium px-2 lg:flex">Create +</span>
+                            </Link>   
+                        </Tooltip>
                     </Fragment>
                 }
                 </nav>
