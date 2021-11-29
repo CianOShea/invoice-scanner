@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import ReactDataSheet from 'react-datasheet';
 import '../index.css';
 import '../grid.css';
-import { Button, Pane, Heading, Strong } from 'evergreen-ui'
+import { Button, Pane, Heading, Strong, toaster } from 'evergreen-ui'
 import Cookie from 'js-cookie'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
@@ -18,6 +18,7 @@ class CreateTemplate extends Component {
                     this.state = {   
                               pageLoaded: false,
                               userToken: '',
+                              paymentID: '',
                               isLoggedIn: false,
                               redirect: null,
                               grid: staticGrid,
@@ -33,7 +34,7 @@ class CreateTemplate extends Component {
                     if (user) {
                               db.collection("users").doc(user.uid).get().then((doc) => {
                               if (doc.exists) {
-                                        this.setState({ userToken: user.uid, isLoggedIn: true, pageLoaded: true })                                           
+                                        this.setState({ userToken: user.uid, isLoggedIn: true, pageLoaded: true, paymentID: doc.data().paymentID })                                           
                               } else {
                               // doc.data() will be undefined in this case
                                         console.log("No such document!");
@@ -59,7 +60,7 @@ class CreateTemplate extends Component {
           editMainHeader(e, tempHeaderIndex){
                     const { templateHeaders } = this.state
                     templateHeaders[tempHeaderIndex].mainTitle = e.target.value
-                    this.setState({ templateHeaders })
+                    this.setState({ templateHeaders, [e.target.name]: e.target.value })
           }
 
           editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex){
@@ -80,9 +81,35 @@ class CreateTemplate extends Component {
                     this.setState({ templateHeaders })
           }
 
+          removeHeader(index){
+                    const { templateHeaders } = this.state
+                    console.log(index);
+                    templateHeaders.splice(index, 1)
+                    this.setState({ templateHeaders })
+          }
+
+          removeAdditionalOption(tempHeaderIndex, additionalTitleIndex){
+                    const { templateHeaders } = this.state
+                    console.log(tempHeaderIndex);
+                    console.log(additionalTitleIndex);
+                    templateHeaders[tempHeaderIndex].additionalTitles.splice(additionalTitleIndex, 1)
+                    this.setState({ templateHeaders })
+          }
+
           createTemplate(){
-                    const { templateName, templateHeaders } = this.state
+                    const { templateName, templateHeaders, paymentID } = this.state
                     console.log(templateHeaders)
+
+                    if(templateName === ""){
+                              toaster.danger("Please ensure all field are filled in");
+                              return
+                    }
+                    for (var i = 0; i < templateHeaders.length; i++) {
+                              if(templateHeaders[i].mainTitle === ""){
+                                        return
+                              }
+                              
+                    }
 
                     const template = { name: templateName, headers: [] }
                     for (var i = 0; i < templateHeaders.length; i++) {
@@ -91,6 +118,22 @@ class CreateTemplate extends Component {
                               template.headers.push({mainTitle: templateHeaders[i].mainTitle, additionalTitles: additionalTitleValues})
                     }
                     console.log(template);
+
+                    const templateRef = db.collection("teams").doc(paymentID)
+
+                    try {
+                              templateRef.get().then(doc => {
+                                        if(doc.exists){
+                                                  templateRef.update({ templates: firebase.firestore.FieldValue.arrayUnion(template)  });
+                                        } else {
+                                                  console.log('Doc does not exist');
+                                        }
+                              })
+                    } catch (error) {
+                              console.error(error);
+                    }
+                    
+                  
           }
 
           render() {
@@ -124,22 +167,31 @@ class CreateTemplate extends Component {
                                                                                           templateHeaders.map(((tempHeader, tempHeaderIndex) => (
                                                                                           
                                                                                                     <div className='flex flex-row w-full'>
+                                                                                                              <button onClick={e => this.removeHeader(tempHeaderIndex)} className="text-white bg-red-700 rounded hover:bg-red-600 focus:outline-none focus:bg-red-600">
+                                                                                                                        Remove Header
+                                                                                                              </button>
                                                                                                               <div className='flex flex-col w-full p-2'>
                                                                                                                         <div className='flex flex-col'>
                                                                                                                                   <Strong size={600}>Main Term</Strong>                                                                                                                                                                             
-                                                                                                                                  <input onChange={e => this.editMainHeader(e, tempHeaderIndex)} name="mainTitle" id="mainTitle" className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                  <input onChange={e => this.editMainHeader(e, tempHeaderIndex)} value={tempHeader.mainTitle} key={tempHeaderIndex} name={`mainTitle:${tempHeaderIndex}`} id={`${tempHeaderIndex}`} className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
                                                                                                                         </div>  
                                                                                                               </div>
                                                                                                               <div className='flex flex-col w-full p-2'>
                                                                                                                         <div className='flex flex-col'>
                                                                                                                                   <Strong size={600}>Additional Options</Strong> 
                                                                                                                                   {         tempHeader.additionalTitles.map(((additionalTitle, additionalTitleIndex) => (
-                                                                                                                                                      <input onChange={e => this.editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex)} name="additionalTitle" id="additionalTitle" className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                                      <div>
+                                                                                                                                                                <input onChange={e => this.editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex)} value={additionalTitle.title} key={additionalTitleIndex} name="additionalTitle" id="additionalTitle" className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                                                <button onClick={e => this.removeAdditionalOption(tempHeaderIndex, additionalTitleIndex)} className="text-white bg-red-700 rounded hover:bg-red-600 focus:outline-none focus:bg-red-600">
+                                                                                                                                                                          Remove Additional
+                                                                                                                                                                </button>
+                                                                                                                                                      </div>
                                                                                                                                             )))
                                                                                                                                   }                                                                                                                        
                                                                                                                                   <button onClick={e => this.addAdditionalOption(tempHeaderIndex)} className="w-full mt-2 px-4 py-2 tracking-wide text-white bg-gray-700 rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
                                                                                                                                             Add Additional Search Options
                                                                                                                                   </button>
+                                                                                                                                  
                                                                                                                         </div>
                                                                                                               </div>
                                                                                                     </div>
