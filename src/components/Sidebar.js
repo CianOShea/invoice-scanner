@@ -26,11 +26,13 @@ function Sidebar(props) {
             
             db.collection("users").doc(user.uid).get().then((doc) => {
                 if (doc.exists) {
+                    Cookie.set('paymentID', doc.data().paymentID)
                     db.collection("teams").doc(doc.data().paymentID).get().then((doc) => {
                         if (doc.exists) {
-                            setTemplates(doc.data().templates)
+                            setTemplates(doc.data().templates)                            
+                            
                             // console.log(doc.data().templates)
-                        }else {
+                        } else {
                             // doc.data() will be undefined in this case
                             console.log("No such document!");
                         }
@@ -44,14 +46,22 @@ function Sidebar(props) {
             });
 
             } else {
-            // No user is signed in.
-            setUser(null)
-            setIsLoggedIn(false)
+                // No user is signed in.
+                setUser(null)
+                setIsLoggedIn(false)
             }
         });
+
+        const paymentID = Cookie.get("paymentID")
+        const templateRef = db.collection("teams").doc(paymentID)
+        const unsubscribe = templateRef.onSnapshot(snapshot => {
+            console.log(snapshot.data());
+            setTemplates(snapshot.data().templates) 
+            history.push('/')   
+        })
+        
     }, []) 
-
-
+    
     const signOut = () => {    
         firebase.auth().signOut().then(() => {
             // Sign-out successful.

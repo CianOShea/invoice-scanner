@@ -137,7 +137,7 @@ class CreateTemplate extends Component {
                     if(template.headers.length < 1){
                               toaster.danger("Please ensure all field are filled in");
                               return    
-                    }
+                    }                    
 
                     const templateRef = db.collection("teams").doc(paymentID)
 

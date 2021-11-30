@@ -687,6 +687,25 @@ class id extends Component {
       sessionStorage.setItem(`${pageName}XlsxData`, JSON.stringify(xlsxData))
     }
 
+    deleteTemplate(){
+      const { paymentID } = this.state
+      console.log(this.props.location.query.templateData);
+      const templateRef = db.collection("teams").doc(paymentID)
+      try {
+        templateRef.get().then(doc => {
+          if(doc.exists){
+            templateRef.update({ templates: firebase.firestore.FieldValue.arrayRemove(this.props.location.query.templateData) });
+            toaster.success("Template Deleted");
+          } else {
+            console.log('Doc does not exist');
+            toaster.danger("An error occured");
+          }
+        })
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     
     render() { 
         const { pageName, pageHeaders, mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
@@ -729,8 +748,10 @@ class id extends Component {
                     <Pane padding='40px' paddingTop={10} justifyContent='center' alignItems='center'>    
 
                       <div>                      
-                      
-                      <Heading size={900} marginBottom={50}>{pageName}</Heading>
+                      <div className="flex flex-row justify-between">
+                        <Heading size={900} marginBottom={50}>{pageName}</Heading>
+                        <Button onClick={() => this.deleteTemplate()} appearance="primary">Delete Template</Button>
+                      </div>
 
                       <Form onSubmit={this.handleSubmit}>
                         <FormGroup>                 
