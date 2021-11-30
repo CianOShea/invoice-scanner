@@ -8,7 +8,7 @@ import Cookie from 'js-cookie'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
 
-const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' }]]
+const staticGrid = [[{ value: ''}], [{ value: ''}], [{ value: ''}], [{ value: ''}]]
 
 class CreateTemplate extends Component {
 
@@ -22,7 +22,7 @@ class CreateTemplate extends Component {
                               isLoggedIn: false,
                               redirect: null,
                               grid: staticGrid,
-                              header: [[{ value: ''}, { value: '' },{ value: '' }, { value: '' }]],
+                              header: [[{ value: ''}]],
                               templateName: '',
                               templateHeaders: [{ mainTitle: '' , additionalTitles: [{ title: '' }]}]
                     }
@@ -58,9 +58,10 @@ class CreateTemplate extends Component {
           }
 
           editMainHeader(e, tempHeaderIndex){
-                    const { templateHeaders } = this.state
+                    const { templateHeaders, header } = this.state
                     templateHeaders[tempHeaderIndex].mainTitle = e.target.value
-                    this.setState({ templateHeaders, [e.target.name]: e.target.value })
+                    header[0][tempHeaderIndex].value = e.target.value
+                    this.setState({ templateHeaders, header })
           }
 
           editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex){
@@ -70,9 +71,14 @@ class CreateTemplate extends Component {
           }
 
           addHeader(e){
-                    const { templateHeaders } = this.state
+                    const { templateHeaders, header, grid } = this.state
                     templateHeaders.push({ mainTitle: '' , additionalTitles: [{ title: '' }]})
-                    this.setState({ templateHeaders })
+                    header[0].push({ value: '' })
+                    for (var i = 0; i < grid.length; i++) {
+                              grid[i].push({ value: '' })
+                    }
+
+                    this.setState({ templateHeaders, header, grid })
           }
 
           addAdditionalOption(index){
@@ -82,10 +88,18 @@ class CreateTemplate extends Component {
           }
 
           removeHeader(index){
-                    const { templateHeaders } = this.state
-                    console.log(index);
-                    templateHeaders.splice(index, 1)
-                    this.setState({ templateHeaders })
+                    const { templateHeaders, header, grid } = this.state
+                    console.log(templateHeaders.length);
+                    if(templateHeaders.length === 1){
+                              this.setState({ templateHeaders: [{ mainTitle: '' , additionalTitles: [{ title: '' }]}], header: [[{ value: ''}]] })
+                    } else {
+                              templateHeaders.splice(index, 1)
+                              header[0].splice(index, 1)
+                              for (var i = 0; i < grid.length; i++) {
+                                        grid[i].splice(index, 1)
+                              }
+                              this.setState({ templateHeaders, header, grid })
+                    }    
           }
 
           removeAdditionalOption(tempHeaderIndex, additionalTitleIndex){
@@ -106,6 +120,7 @@ class CreateTemplate extends Component {
                     }
                     for (var i = 0; i < templateHeaders.length; i++) {
                               if(templateHeaders[i].mainTitle === ""){
+                                        toaster.danger("Please ensure all field are filled in");
                                         return
                               }
                               
@@ -119,12 +134,18 @@ class CreateTemplate extends Component {
                     }
                     console.log(template);
 
+                    if(template.headers.length < 1){
+                              toaster.danger("Please ensure all field are filled in");
+                              return    
+                    }
+
                     const templateRef = db.collection("teams").doc(paymentID)
 
                     try {
                               templateRef.get().then(doc => {
                                         if(doc.exists){
                                                   templateRef.update({ templates: firebase.firestore.FieldValue.arrayUnion(template)  });
+                                                  toaster.success("Template Created");
                                         } else {
                                                   console.log('Doc does not exist');
                                         }
@@ -222,13 +243,13 @@ class CreateTemplate extends Component {
                                                                                 <ReactDataSheet
                                                                                           data={this.state.grid}
                                                                                           valueRenderer={cell => cell.value}
-                                                                                          onCellsChanged={changes => {
-                                                                                          const grid = this.state.grid.map(row => [...row]);
-                                                                                          changes.forEach(({ cell, row, col, value }) => {
-                                                                                                    grid[row][col] = { ...grid[row][col], value };
-                                                                                          });
-                                                                                                    this.setState({ grid });
-                                                                                          }}                        
+                                                                                          // onCellsChanged={changes => {
+                                                                                          // const grid = this.state.grid.map(row => [...row]);
+                                                                                          // changes.forEach(({ cell, row, col, value }) => {
+                                                                                          //           grid[row][col] = { ...grid[row][col], value };
+                                                                                          // });
+                                                                                          //           this.setState({ grid });
+                                                                                          // }}                        
                                                                                 />
                                                                                 
                                                                       </div>   
