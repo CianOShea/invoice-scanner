@@ -53,12 +53,14 @@ function Sidebar(props) {
         });
 
         const paymentID = Cookie.get("paymentID")
-        const templateRef = db.collection("teams").doc(paymentID)
-        const unsubscribe = templateRef.onSnapshot(snapshot => {
-            console.log(snapshot.data());
-            setTemplates(snapshot.data().templates) 
-            history.push('/')   
-        })
+        if(paymentID){
+            const templateRef = db.collection("teams").doc(paymentID)
+            const unsubscribe = templateRef.onSnapshot(snapshot => {
+                console.log(snapshot.data());
+                setTemplates(snapshot.data().templates) 
+                history.push('/')   
+            })
+        }
         
     }, []) 
     
@@ -87,8 +89,8 @@ function Sidebar(props) {
                     <h2 className='sidebarTitle'>InvoSync</h2>
                 </div>
             </Pane>
-            <div className="flex flex-col justify-between flex-1 mt-6 mw-100">
-                <nav>
+            <div className="flex flex-col justify-between mt-6 max-w-100 overflow-auto">
+                <nav id='sidebar' className='overflow-auto pr-1'>
                 {
                     isLoggedIn &&
                     <Fragment>
@@ -121,19 +123,21 @@ function Sidebar(props) {
                             ))
                         }   
 
-                        <Tooltip content="Create Template +" position={Position.RIGHT}>
-                            <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 ${location.pathname === '/CreateTemplate' && "backgroundBlue600"}`} to="/CreateTemplate">                                    
-                                <div className="flex px-2">
-                                    <FontAwesomeIcon icon={faPlusCircle} />
-                                </div>
-                                <span className="hidden text-xl font-medium px-2 lg:flex">Create +</span>
-                            </Link>   
-                        </Tooltip>
+                        
                     </Fragment>
                 }
                 </nav>
+
+                <Tooltip content="Create Template +" position={Position.RIGHT}>
+                    <Link className={`flex no-underline items-center px-2 py-2 mt-4 text-white rounded-lg justify-center lg:justify-start hover:bg-blue-600 bg-blue-800`} to="/CreateTemplate">                                    
+                        <div className="flex px-2">
+                            <FontAwesomeIcon icon={faPlusCircle} />
+                        </div>
+                        <span className="hidden text-xl font-medium px-2 lg:flex">Create +</span>
+                    </Link>   
+                </Tooltip>
                 
-                <button onClick={() => onDashboard()} className="flex mx-auto items-center text-white bg-green-500 py-2 px-2 focus:outline-none hover:bg-green-600 rounded text-md">
+                <button onClick={() => onDashboard()} className="flex mx-auto items-center text-white bg-green-500 mt-4 mb-4 py-2 px-2 focus:outline-none hover:bg-green-600 rounded text-md">
                     <div className="flex px-2">
                         <HomeIcon color='white'/>
                     </div>
@@ -141,7 +145,7 @@ function Sidebar(props) {
                 </button>
                 {
                     isLoggedIn &&
-                    <Fragment>
+                    <div className='mt-4 bottom-0'>
                             <button onClick={() => signOut()} className="sidebarButton">
                                 <Tooltip content="Sign Out" position={Position.RIGHT}>    
                                     <div className='sidebarButtonContent'>                                                                        
@@ -150,11 +154,11 @@ function Sidebar(props) {
                                     </div>
                                 </Tooltip>
                             </button>
-                    </Fragment>
+                    </div>
                 }         
                 {
                     !isLoggedIn &&
-                    <Fragment>
+                    <div className='mt-4'>
                         <Link className="sidebarLogimButton" onClick={() => setCurrentTab('Login')} textDecoration='none' to="/Login">
                             <button className="sidebarButton">
                                 <Tooltip content="Login" position={Position.RIGHT}>  
@@ -165,7 +169,7 @@ function Sidebar(props) {
                                 </Tooltip>
                             </button>
                         </Link>
-                    </Fragment>
+                    </div>
                 }        
             </div>
         </div>

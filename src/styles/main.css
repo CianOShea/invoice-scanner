@@ -334,6 +334,7 @@
         align-items: flex-start; /* items-start */
         width: 12rem; /* w-48 */
         height: 100vh; /* h-screen */
+        max-height:100vh;
         padding-left: 1rem; /* px-4 */
         padding-right: 1rem;
         padding-top: 2rem; /* py-8 */

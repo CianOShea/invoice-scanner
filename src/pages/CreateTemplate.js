@@ -4,6 +4,8 @@ import ReactDataSheet from 'react-datasheet';
 import '../index.css';
 import '../grid.css';
 import { Button, Pane, Heading, Strong, toaster } from 'evergreen-ui'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMinusCircle } from '@fortawesome/free-solid-svg-icons'
 import Cookie from 'js-cookie'
 import firebase from '../firebase/firebase'
 const db = firebase.firestore();
@@ -106,8 +108,12 @@ class CreateTemplate extends Component {
                     const { templateHeaders } = this.state
                     console.log(tempHeaderIndex);
                     console.log(additionalTitleIndex);
-                    templateHeaders[tempHeaderIndex].additionalTitles.splice(additionalTitleIndex, 1)
-                    this.setState({ templateHeaders })
+                    if(templateHeaders[tempHeaderIndex].additionalTitles.length === 1){
+                              templateHeaders[tempHeaderIndex].additionalTitles = [{ title: '' }]
+                    } else {
+                              templateHeaders[tempHeaderIndex].additionalTitles.splice(additionalTitleIndex, 1)                              
+                    }        
+                    this.setState({ templateHeaders })            
           }
 
           createTemplate(){
@@ -174,43 +180,50 @@ class CreateTemplate extends Component {
                               <div className='mainPage'>
                                         <div className="sidebarImport"></div>
                                         
-                                        <div className="mainContent pr-10 pl-5 pt-5">  
+                                        <div className="mainContent pr-10 pl-5">  
                                                   <div className='h-screen max-h-screen'>
-                                                            <div className='p-10 justify-center items-center rounded-lg shadow-lg'>
-                                                                      <div className='h-4/6 m-h-4/6 overflow-auto'>
+                                                            <div className='p-10 justify-center items-center rounded-lg shadow-lg mb-10'>
+                                                                      <div className='h-4/6 max-h-4/6 overflow-auto'>
                                                              
-                                                                                <Heading textAlign='center' size={900} marginBottom={50}>Create Template</Heading>
-                                                                                <div className='flex flex-row mt-10 mb-5 items-center justify-center space-x-4'>
+                                                                                <Heading textAlign='center' size={900} marginBottom={30}>Create Template</Heading>
+                                                                                <div className='flex flex-row mt-10 mb-3 items-center justify-center space-x-4'>
                                                                                           <Strong size={600}>Template Name:</Strong>
                                                                                           <input onChange={e => this.onChange(e)} name="templateName" id="templateName" className="block w-64 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
                                                                                 </div>
                                                                                 {
                                                                                           templateHeaders.map(((tempHeader, tempHeaderIndex) => (
                                                                                           
-                                                                                                    <div className='flex flex-row w-full'>
-                                                                                                              <button onClick={e => this.removeHeader(tempHeaderIndex)} className="text-white bg-red-700 rounded hover:bg-red-600 focus:outline-none focus:bg-red-600">
-                                                                                                                        Remove Header
-                                                                                                              </button>
+                                                                                                    <div className='flex flex-row w-full'>                                                                                                              
                                                                                                               <div className='flex flex-col w-full p-2'>
                                                                                                                         <div className='flex flex-col'>
-                                                                                                                                  <Strong size={600}>Main Term</Strong>                                                                                                                                                                             
-                                                                                                                                  <input onChange={e => this.editMainHeader(e, tempHeaderIndex)} value={tempHeader.mainTitle} key={tempHeaderIndex} name={`mainTitle:${tempHeaderIndex}`} id={`${tempHeaderIndex}`} className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                  <Strong size={600}>Main Search Term</Strong> 
+                                                                                                                                  <div className='flex flex-row justify-start items-center'>                                                                                                                                                                            
+                                                                                                                                            <input onChange={e => this.editMainHeader(e, tempHeaderIndex)} value={tempHeader.mainTitle} key={tempHeaderIndex} name={`mainTitle:${tempHeaderIndex}`} id={`${tempHeaderIndex}`} className="block w-5/6 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                            <button onClick={e => this.removeHeader(tempHeaderIndex)} className="text-red-500 bg-white rounded-full ml-3">
+                                                                                                                                                      <div className="flex justify-center">
+                                                                                                                                                                <FontAwesomeIcon size='lg' icon={faMinusCircle} />
+                                                                                                                                                      </div>
+                                                                                                                                            </button>
+                                                                                                                                  </div>
                                                                                                                         </div>  
+                                                                                                                        
                                                                                                               </div>
                                                                                                               <div className='flex flex-col w-full p-2'>
                                                                                                                         <div className='flex flex-col'>
                                                                                                                                   <Strong size={600}>Additional Options</Strong> 
                                                                                                                                   {         tempHeader.additionalTitles.map(((additionalTitle, additionalTitleIndex) => (
-                                                                                                                                                      <div>
-                                                                                                                                                                <input onChange={e => this.editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex)} value={additionalTitle.title} key={additionalTitleIndex} name="additionalTitle" id="additionalTitle" className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
-                                                                                                                                                                <button onClick={e => this.removeAdditionalOption(tempHeaderIndex, additionalTitleIndex)} className="text-white bg-red-700 rounded hover:bg-red-600 focus:outline-none focus:bg-red-600">
-                                                                                                                                                                          Remove Additional
+                                                                                                                                                      <div className='flex flex-row justify-start items-center'>
+                                                                                                                                                                <input onChange={e => this.editAdditionalOptions(e, tempHeaderIndex, additionalTitleIndex)} value={additionalTitle.title} key={additionalTitleIndex} name="additionalTitle" id="additionalTitle" className="block w-5/6 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md focus:border-blue-500 focus:outlint-none" type="email" />
+                                                                                                                                                                <button onClick={e => this.removeAdditionalOption(tempHeaderIndex, additionalTitleIndex)} className="text-red-500 bg-white rounded-full ml-3">
+                                                                                                                                                                          <div className="flex justify-center">
+                                                                                                                                                                                    <FontAwesomeIcon size='lg' icon={faMinusCircle} />
+                                                                                                                                                                          </div>
                                                                                                                                                                 </button>
                                                                                                                                                       </div>
                                                                                                                                             )))
                                                                                                                                   }                                                                                                                        
-                                                                                                                                  <button onClick={e => this.addAdditionalOption(tempHeaderIndex)} className="w-full mt-2 px-4 py-2 tracking-wide text-white bg-gray-700 rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
-                                                                                                                                            Add Additional Search Options
+                                                                                                                                  <button onClick={e => this.addAdditionalOption(tempHeaderIndex)} className="mt-2 w-2/6 px-4 py-2 tracking-wide text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:bg-green-600">
+                                                                                                                                            Add +
                                                                                                                                   </button>
                                                                                                                                   
                                                                                                                         </div>
@@ -219,13 +232,13 @@ class CreateTemplate extends Component {
                                                                                           )))
                                                                                 }
                                                                                 <div className='flex justify-center'>
-                                                                                          <button onClick={e => this.addHeader(e)} className="w-1/3 px-4 py-2 tracking-wide text-white bg-gray-700 rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
+                                                                                          <button onClick={e => this.addHeader(e)} className="px-4 py-2 tracking-wide text-white bg-gray-700 rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
                                                                                                     Add Additional Search Header
                                                                                           </button>
                                                                                 </div>
 
-                                                                                <div className='flex justify-center'>
-                                                                                          <button onClick={e => this.createTemplate(e)} className="w-1/3 px-4 py-2 tracking-wide text-white bg-gray-700 rounded hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
+                                                                                <div className='flex justify-center pt-3'>
+                                                                                          <button onClick={e => this.createTemplate(e)} className="px-4 py-2 tracking-wide text-white bg-blue-600 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
                                                                                                     Create Template +
                                                                                           </button>
                                                                                 </div>
