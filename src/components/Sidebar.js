@@ -58,7 +58,7 @@ function Sidebar(props) {
             const unsubscribe = templateRef.onSnapshot(snapshot => {
                 console.log(snapshot.data());
                 setTemplates(snapshot.data().templates) 
-                history.push('/')   
+                // history.push('/')   
             })
         }
         

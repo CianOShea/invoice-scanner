@@ -131,14 +131,7 @@ class Invoice extends Component {
       })
       
       // return () => unsubscribe()
-    }
-
-    async handleSubmit(e){
-        e.preventDefault();
-        this.setState({
-            confirmation: 'Uploading...'
-        })
-    }    
+    }  
 
     async getFiles(unscannedFiles, index){                  
         
@@ -468,6 +461,8 @@ class Invoice extends Component {
       console.log(unscannedFiles);
       
       this.setState({ files: files, unscannedFiles: unscannedFiles })
+
+      this.myRef.current.children[0].value = null
     }
 
 
@@ -770,8 +765,7 @@ class Invoice extends Component {
     
     render() { 
         const { mobileScanData, mobileScanDialog, pageLoaded, isLoggedIn, redirect, progressBar, messages, appVersion, cornerDialog, sampleScannedFileData, sampleMissingData, missingDataDialog, missingData, scannedFileData, unscannedFiles, scannedFiles, fileExt, xlsxData, array, csv, formData, keyMap, tableData, imageDataURL, sortedFormData, scanComplete, isScanning } = this.state  
-        
-        
+
         if(pageLoaded){
           if(!isLoggedIn){
             return (
@@ -810,16 +804,15 @@ class Invoice extends Component {
                       
                       <Heading size={900} marginBottom={50}>Invoice Scanner</Heading>
 
-                      <Form onSubmit={this.handleSubmit}>
+                      <Form>
                         <FormGroup>                 
 
                             <Pane display='flex' justifyContent='center'>
                               <label htmlFor="file-upload" >
-                                <span className='uploadLabel'>Upload a file</span>
                                 <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                               </label>
-                              <Pane marginLeft={4}>
-                                <p>or drag and drop</p>
+                              <Pane>
+                                <p>Upload a file or drag and drop</p>
                               </Pane>
                             </Pane>
 

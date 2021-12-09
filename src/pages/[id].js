@@ -36,7 +36,7 @@ AWS.config.update({
 
 const lambda = new AWS.Lambda({region: process.env.REACT_APP_AWS_REGION, apiVersion: '2015-03-31'});
 
-const staticGrid = [[{ value: '1'}, { value: '2' },{ value: '3' }, { value: '4' },{ value: '5' }, { value: '6' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
+const staticGrid = [[{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }], [{ value: ''}, { value: '' },{ value: '' }, { value: '' },{ value: '' }, { value: '' }]]
 
 
 class id extends Component {
@@ -184,14 +184,7 @@ class id extends Component {
       })
       
     }
-
-
-    async handleSubmit(e){
-        e.preventDefault();
-        this.setState({
-            confirmation: 'Uploading...'
-        })
-    }    
+   
 
     async getFiles(unscannedFiles, index){                  
         
@@ -413,10 +406,10 @@ class id extends Component {
     }
 
     prepareExcel(){
-      const { scannedFileData, header } = this.state
+      const { scannedFileData, pageHeaders } = this.state
 
       console.log(scannedFileData);
-      console.log(header);
+      console.log(pageHeaders);
 
       var excel = []
 
@@ -429,8 +422,8 @@ class id extends Component {
         excel.push(merged)
       }    
 
-      for(var i=0; i < header.length; i++){          
-        var arr = header[i].map(row => {
+      for(var i=0; i < pageHeaders.length; i++){          
+        var arr = pageHeaders[i].map(row => {
           var value = row.value
           return value
         })
@@ -533,6 +526,8 @@ class id extends Component {
       console.log(unscannedFiles);
       
       this.setState({ files: files, unscannedFiles: unscannedFiles })
+
+      this.myRef.current.children[0].value = null
     }
 
 
@@ -753,16 +748,15 @@ class id extends Component {
                         <Button onClick={() => this.deleteTemplate()} appearance="primary">Delete Template</Button>
                       </div>
 
-                      <Form onSubmit={this.handleSubmit}>
+                      <Form>
                         <FormGroup>                 
 
                             <Pane display='flex' justifyContent='center'>
                               <label htmlFor="file-upload" >
-                                <span className='uploadLabel'>Upload a file</span>
                                 <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                               </label>
-                              <Pane marginLeft={4}>
-                                <p>or drag and drop</p>
+                              <Pane>
+                                <p>Upload a file or drag and drop</p>
                               </Pane>
                             </Pane>
 
